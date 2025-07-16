@@ -10,6 +10,7 @@ COPY pyproject.toml poetry.lock /app/
 RUN poetry install --no-root
 
 COPY search_service/ /app/
+COPY templates/ /app/templates
 
 EXPOSE 8000
 
