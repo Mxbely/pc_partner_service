@@ -1,0 +1,7 @@
+services:
+  search:
+    build:
+      context: .
+      dockerfile: search_service/Dockerfile
+    ports:
+      - 9000:8000
