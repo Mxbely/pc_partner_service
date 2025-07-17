@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from pathlib import Path
+from datetime import datetime
 
 
 base_context = {
@@ -21,6 +23,7 @@ base_context = {
 @dataclass
 class Item:
     src: str
+    category: str
     name: str
     price: str
     url: str
@@ -30,6 +33,22 @@ class Item:
 class BaseParser:
     def __init__(self, query: str) -> None:
         self.query = query
+        self.filename = f"{type(self).__name__}{datetime.today().strftime('%Y-%m-%d_%H-%M')}.csv"
 
     def parse(self):
         raise NotImplementedError
+
+def delete_file(filename: str):
+    if Path(filename).exists():
+        Path(filename).unlink()
+
+def write_to_csv(items: list[Item], filename: str):
+    if not Path(filename).exists():
+        with open(filename, "a") as f:
+            f.write("src,category,name,price,url,status\n")
+
+    with open(filename, "a") as f:
+        for item in items:
+            f.write(f"{item.src},{item.category},{item.name},{item.price},{item.url} ,{item.status}\n")
+
+

@@ -1,6 +1,6 @@
 
 from pathlib import Path
-from base import BaseParser, base_context, Item
+from search_service.parsers.base import BaseParser, base_context, Item, write_to_csv, delete_file
 import re
 from playwright.sync_api import Playwright, sync_playwright, expect
 import time
@@ -11,18 +11,10 @@ FILE_NAME = f"4laptop{datetime.today().strftime('%Y-%m-%d_%H-%M')}.csv"
 
 class ForLaptopKievParser(BaseParser):
     def parse(self):
-        pass
+        with sync_playwright() as playwright:
+            run(playwright, self.query, self.filename)
 
-def write_to_csv(items: list[Item], filename: str = FILE_NAME):
-    if Path(FILE_NAME).exists():
-        Path(FILE_NAME).unlink()
-    with open(filename, "w") as f:
-        f.write("src,name,price,url,status\n")
-        for item in items:
-            f.write(f"{item.src},{item.name},{item.price},{item.url},{item.status}\n")
 
-query = "блок живлення"
-# query = "матриця 15.6"
 def wait_for_stable_items(page, selector: str, stable_time: float = 1.5, timeout: float = 10.0, poll_interval: float = 0.2) -> int:
     """
     Чекає, поки кількість елементів за селектором перестане змінюватися.
@@ -57,9 +49,10 @@ def wait_for_stable_items(page, selector: str, stable_time: float = 1.5, timeout
     return last_count
 
 
-def run(playwright: Playwright, query: str) -> None:
+def run(playwright: Playwright, query: str, filename: str) -> None:
+    delete_file(filename)
     print(f"Start query: {query}")
-    browser = playwright.chromium.launch(headless=False)
+    browser = playwright.chromium.launch(headless=True)
     context = browser.new_context(**base_context)
     page = context.new_page()
     page.goto("https://4laptop.kiev.ua/ua")
@@ -76,8 +69,9 @@ def run(playwright: Playwright, query: str) -> None:
     print(f"Count: {count}")
     items = page.locator(selector)
 
-    selector = ".category-page .product-layout"
-    items = page.locator(selector)
+    if items.count() == 0:
+        print("Lap No items found")
+        return
 
     items_ = []
     for i in range(items.count()):
@@ -86,10 +80,9 @@ def run(playwright: Playwright, query: str) -> None:
         link = items.nth(i).locator(".product-name a").get_attribute("href")
         price = items.nth(i).locator(".price .price_no_format").inner_text()
         status = items.nth(i).locator(".stock-status").inner_text()
-        items_.append(Item(src=SOURCE, name=name, price=price, url=link, status=status))
-        print(f"{i}: {name} | {price} | {status} | {link}")
+        items_.append(Item(src=SOURCE, category="all", name=name, price=price, url=link, status=status))
 
-    write_to_csv(items_)
+    write_to_csv(items_, filename)
 
     # ---------------------
     context.close()
@@ -101,4 +94,6 @@ def main(query: str):
         run(playwright, query)
 
 if __name__ == "__main__":
-    main()
+    query = "блок живлення"
+    # query = "матриця 15.6"
+    main(query)

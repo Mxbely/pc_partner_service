@@ -8,10 +8,13 @@ WORKDIR /app
 COPY pyproject.toml poetry.lock /app/
 
 RUN poetry install --no-root
+RUN poetry run playwright install --with-deps
 
-COPY search_service/ /app/
+COPY search_service/ /app/search_service/
 COPY templates/ /app/templates
+
+ENV PYTHONPATH=/app
 
 EXPOSE 8000
 
-CMD ["poetry", "run", "fastapi", "run", "main.py"]
+CMD ["poetry", "run", "uvicorn", "search_service.main:app", "--host", "0.0.0.0", "--port", "8000"]

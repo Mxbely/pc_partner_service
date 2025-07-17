@@ -14,37 +14,43 @@
     <div id="alert" class="alert d-none" role="alert" style="white-space: pre-line;"></div>
 
     <div class="buttons-block default-margin-top">
-        <input type="text" id="search" placeholder="Пошук"></input>
-        <button type="button" class="btn btn-primary" onclick="search()">Пошук</button>
+        <form action="/search" method="get">
+            <input type="text" name="query" placeholder="Пошук" />
+            <button type="submit" class="btn btn-primary">Пошук</button>   
+        </form>
         <div>
-            <!-- <button type="button" class="btn btn-primary" onclick="createMission()">Створити нову місію</button>
-            <button type="button" class="btn btn-danger" onclick="deleteSelectedMissions()">Видалити</button> -->
+
         </div>
     </div>
 
     <form class="mt-3">
         <table style="width: 100%; table-layout: fixed;" >
-            <!-- <colgroup>
-                <col style="width: 40px;">
-                <col style="width: 25%;">
-                <col style="width: 25%;">
+            <colgroup>
                 <col style="width: auto;">
-            </colgroup> -->
+                <col style="width: auto;">
+                <col style="width: auto;">
+                <col style="width: auto;">
+                <col style="width: auto;">
+            </colgroup>
             <thead>
                 <tr>
                     <!-- <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" style="transform: scale(1.5);"></th> -->
-                    <th>Назва місії</th>
-                    <th>Дата створення</th>
+                    <th>Постачальник</th>
+                    <th>Категорія</th>
+                    <th>Назва</th>
+                    <th>Ціна</th>
                     <th>Посилання</th>
                 </tr>
             </thead>
             <tbody>
-                print SmthS
                 {% if item_list %}
                 {% for item in item_list %}
                 <tr>
-                    <!-- <td><input type="checkbox" name="mission_ids" value="{{ mission.id }}" style="transform: scale(1.5);"></td> -->
-                    <td><a href="#" class="mission-link">Smth</a></td>
+                    <td>{{ item.src }}</td>
+                    <td>{{ item.category }}</td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.price }}</td>
+                    <td><a href="{{ item.url }}">{{ item.url }}</a></td>
                     </td>
                 </tr>
                 {% endfor %}
@@ -61,14 +67,7 @@
 </div>
 
 <script>
-    function search() {
-        var query = document.getElementById("search").value;
-        fetch("{{url_for('search', query=query)}}")
-            .then(response => response.json())
-            .then(data => {
-                
-            })
-    }
+
 </script>
 
 {% endblock content %}
