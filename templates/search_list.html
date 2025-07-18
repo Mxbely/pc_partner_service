@@ -9,7 +9,7 @@
 <br>
 
 <div class="base-container">
-    <h2 align="center">Список місій</h2>
+    <h2 align="center">Список товарів</h2>
 
     <div id="alert" class="alert d-none" role="alert" style="white-space: pre-line;"></div>
 
@@ -19,12 +19,13 @@
             <button type="submit" class="btn btn-primary">Пошук</button>   
         </form>
         <div>
-
+            <span class="badge badge-info">Знайдено {{ total_items }} товарів</span>
+            <span class="badge badge-secondary">Запит: "{{ query }}"</span>
         </div>
     </div>
 
     <form class="mt-3">
-        <table style="width: 100%; table-layout: fixed;" >
+        <table style="width: 100%; table-layout: fixed;" class="table table-bordered table-striped">
             <colgroup>
                 <col style="width: auto;">
                 <col style="width: auto;">
@@ -39,6 +40,7 @@
                     <th>Категорія</th>
                     <th>Назва</th>
                     <th>Ціна</th>
+                    <th>Статус</th>
                     <th>Посилання</th>
                 </tr>
             </thead>
@@ -50,6 +52,7 @@
                     <td>{{ item.category }}</td>
                     <td>{{ item.name }}</td>
                     <td>{{ item.price }}</td>
+                    <td>{{ item.status }}</td>
                     <td><a href="{{ item.url }}">{{ item.url }}</a></td>
                     </td>
                 </tr>
