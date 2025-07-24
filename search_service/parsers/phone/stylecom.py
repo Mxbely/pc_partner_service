@@ -13,11 +13,11 @@ from search_service.parsers.base import (
     write_to_csv,
 )
 
-SOURCE = "all-spares.ua"
-FILE_NAME = f"all_spares_{datetime.today().strftime('%Y-%m-%d_%H-%M')}.csv"
+SOURCE = "stylecom.ua"
+FILE_NAME = f"stylecom_{datetime.today().strftime('%Y-%m-%d_%H-%M')}.csv"
 
 
-class AllSparesParser(BaseParser):
+class StylecomParser(BaseParser):
     def parse(self):
         with sync_playwright() as playwright:
             run(playwright, self.query, self.filename)
@@ -33,43 +33,30 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     context = browser.new_context()
     page = context.new_page()
     query = re.sub(r"\s+", "+", query)
-    base_url = "https://all-spares.ua"
-    url = f"{base_url}/uk/search/?ipp=192&searchword={query}"
+    base_url = "https://stylecom.ua/index.php"
+    url = f"{base_url}?route=elasticsearch/elasticsearch/autocomplete&_route_=ua&search={query}"
     page.goto(url)
-    items = page.locator("article")
-    count = page.locator("article").count()
-    query_check_list = query.split("+")
+    items = page.locator(".product-tile--search-autocompleate")
+    count = page.locator(".product-tile--search-autocompleate").count()
     items_ = []
     for i in range(count):
         item = items.nth(i)
-        name = (
-            item.locator(".component_product_list_info_right h3 a")
+        name = item.locator("a").first.get_attribute("title").strip().replace(",", "")
+        price = (
+            item.locator("div.product-tile__price span").first.text_content().strip()
+        )
+        url = item.locator("a").first.get_attribute("href").strip()
+        status = (
+            item.locator(".product-tile__info .product-tile__stock")
             .text_content()
             .strip()
         )
-        name = name.replace(",", "")
-
-        if not any(word.lower() in name.lower() for word in query_check_list):
+        if status == "Скоро з'явиться":
             continue
-
-        price = item.locator(".product-price .-current")
-        if price.count():
-            price = ascii(price.text_content().strip())
-        else:
-            price = "Ціна не вказана"
-        url = base_url + item.locator(
-            ".component_product_list_info_right h3 a"
-        ).get_attribute("href")
-        status = item.locator(".relative")
-        if status.count():
-            status = "Немає в наявності"
-            continue
-        else:
-            status = "В наявності"
 
         item_data = Item(
             src=SOURCE,
-            category="ALL SPARES",
+            category="all",
             name=name,
             price=price,
             url=url,
@@ -91,6 +78,5 @@ def main(query: str):
 
 
 if __name__ == "__main__":
-    query = "блок живлення"
-    # query = "матриця 15.6"
+    query = "батарея iphone x"
     main(query)

@@ -23,64 +23,20 @@ class ForLaptopKievParser(BaseParser):
             run(playwright, self.query, self.filename)
 
 
-def wait_for_stable_items(
-    page,
-    selector: str,
-    stable_time: float = 1.5,
-    timeout: float = 10.0,
-    poll_interval: float = 0.2,
-) -> int:
-    """
-    Чекає, поки кількість елементів за селектором перестане змінюватися.
-
-    :param page: Playwright page object
-    :param selector: CSS-селектор для елементів
-    :param stable_time: час стабільності (сек.), після якого вважається, що елементи завантажено
-    :param timeout: загальний таймаут очікування (сек.)
-    :param poll_interval: як часто перевіряти (сек.)
-    :return: остаточна кількість елементів
-    """
-    start = time.time()
-    last_count = -1
-    stable_since = time.time()
-
-    while True:
-        count = page.locator(selector).count()
-        now = time.time()
-
-        if count != last_count:
-            last_count = count
-            stable_since = now
-
-        if now - stable_since >= stable_time:
-            break
-
-        if now - start >= timeout:
-            break
-
-        time.sleep(poll_interval)
-
-    return last_count
-
-
 def run(playwright: Playwright, query: str, filename: str) -> None:
     delete_file(filename)
-    print(f"Start query: {query}")
     browser = playwright.chromium.launch(headless=True)
     context = browser.new_context(**base_context)
     page = context.new_page()
-    url = "https://4laptop.kiev.ua/index.php?route=product/search&search={query}&limit=500"
+    url = f"https://4laptop.kiev.ua/index.php?route=product/search&search={query}&limit=500"
 
-    page.goto(url.format(query=query))
+    page.goto(url)
 
     selector = ".category-page .product-layout"
 
-    count = wait_for_stable_items(page, selector)
-    print(f"Count: {count}")
     items = page.locator(selector)
 
     if items.count() == 0:
-        print("Lap No items found")
         return
 
     items_ = []
@@ -90,6 +46,8 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
         link = items.nth(i).locator(".product-name a").get_attribute("href")
         price = items.nth(i).locator(".price .price_no_format").inner_text()
         status = items.nth(i).locator(".stock-status").inner_text()
+        if status == "Нет в наличии":
+            continue
         items_.append(
             Item(
                 src=SOURCE,

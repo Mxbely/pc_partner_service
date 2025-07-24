@@ -13,11 +13,11 @@ from search_service.parsers.base import (
     write_to_csv,
 )
 
-SOURCE = "all-spares.ua"
-FILE_NAME = f"all_spares_{datetime.today().strftime('%Y-%m-%d_%H-%M')}.csv"
+SOURCE = "4nb.com.ua"
+FILE_NAME = f"4nb_{datetime.today().strftime('%Y-%m-%d_%H-%M')}.csv"
 
 
-class AllSparesParser(BaseParser):
+class ForNBParser(BaseParser):
     def parse(self):
         with sync_playwright() as playwright:
             run(playwright, self.query, self.filename)
@@ -33,43 +33,35 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     context = browser.new_context()
     page = context.new_page()
     query = re.sub(r"\s+", "+", query)
-    base_url = "https://all-spares.ua"
-    url = f"{base_url}/uk/search/?ipp=192&searchword={query}"
+    base_url = "https://www.4nb.com.ua"
+    url = f"{base_url}/search?search_query={query}"
     page.goto(url)
-    items = page.locator("article")
-    count = page.locator("article").count()
-    query_check_list = query.split("+")
+    items = page.locator("ul.product_list li.ajax_block_product")
+    count = page.locator("ul.product_list li.ajax_block_product").count()
     items_ = []
     for i in range(count):
         item = items.nth(i)
-        name = (
-            item.locator(".component_product_list_info_right h3 a")
-            .text_content()
-            .strip()
-        )
+        name_element = item.locator(".right-block h5").locator("a").nth(0)
+        name = name_element.text_content().strip().replace(",", "")
         name = name.replace(",", "")
-
-        if not any(word.lower() in name.lower() for word in query_check_list):
-            continue
-
-        price = item.locator(".product-price .-current")
+        price = item.locator(".content_price span")
         if price.count():
-            price = ascii(price.text_content().strip())
+            price = ascii(price.text_content().strip().replace(",", "."))
         else:
             price = "Ціна не вказана"
-        url = base_url + item.locator(
-            ".component_product_list_info_right h3 a"
-        ).get_attribute("href")
-        status = item.locator(".relative")
-        if status.count():
-            status = "Немає в наявності"
             continue
+        url = name_element.get_attribute("href")
+        status = item.locator(".availability")
+        if status.count():
+            status = status.text_content().strip()
+            if status == "Нет в наличии":
+                continue
         else:
-            status = "В наявності"
+            status = "Невідомо"
 
         item_data = Item(
             src=SOURCE,
-            category="ALL SPARES",
+            category="ALL 4NB",
             name=name,
             price=price,
             url=url,
@@ -91,6 +83,5 @@ def main(query: str):
 
 
 if __name__ == "__main__":
-    query = "блок живлення"
-    # query = "матриця 15.6"
+    query = "екран acer"
     main(query)
