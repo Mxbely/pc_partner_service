@@ -7,6 +7,7 @@ from search_service.parsers.laptop.suncomp import SuncompParser
 from search_service.parsers.phone.all_spares import AllSparesParser
 from search_service.parsers.phone.motorolka import MotorolkaParser
 from search_service.parsers.phone.stylecom import StylecomParser
+from search_service.parsers.phone.tplus import TplusParser
 
 
 def delete_old_files():
@@ -42,6 +43,7 @@ def start_pipline(query: str):
         ForNBParser(query),
         StylecomParser(query),
         SuncompParser(query),
+        TplusParser(query),
     ]
 
     for parser in parsers:
@@ -57,6 +59,6 @@ def start_pipline(query: str):
             if os.path.exists(parser.filename):
                 with open(parser.filename, "r") as file:
                     lines = file.readlines()
-                    f.writelines(lines[1:])  # Пропускаємо заголовок
+                    f.writelines(lines[1:])
 
     return finalname

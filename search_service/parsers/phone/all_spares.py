@@ -46,8 +46,8 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
             item.locator(".component_product_list_info_right h3 a")
             .text_content()
             .strip()
+            .replace(",", "")
         )
-        name = name.replace(",", "")
 
         if not any(word.lower() in name.lower() for word in query_check_list):
             continue
