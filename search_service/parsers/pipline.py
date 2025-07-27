@@ -3,6 +3,7 @@ from datetime import datetime
 
 from search_service.parsers.laptop.forlaptop import ForLaptopKievParser
 from search_service.parsers.laptop.fornb import ForNBParser
+from search_service.parsers.laptop.suncomp import SuncompParser
 from search_service.parsers.phone.all_spares import AllSparesParser
 from search_service.parsers.phone.motorolka import MotorolkaParser
 from search_service.parsers.phone.stylecom import StylecomParser
@@ -40,6 +41,7 @@ def start_pipline(query: str):
         AllSparesParser(query),
         ForNBParser(query),
         StylecomParser(query),
+        SuncompParser(query),
     ]
 
     for parser in parsers:

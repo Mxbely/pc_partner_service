@@ -23,19 +23,18 @@
             <span class="badge badge-secondary">Запит: "{{ query }}"</span>
         </div>
     </div>
-
     <form class="mt-3">
-        <table style="width: 100%; table-layout: fixed;" class="table table-bordered table-striped">
+        <table class="table table-bordered table-striped">
             <colgroup>
+                <col style="width: 15%;">
+                <col style="width: 10%;">
                 <col style="width: auto;">
-                <col style="width: auto;">
-                <col style="width: auto;">
-                <col style="width: auto;">
-                <col style="width: auto;">
+                <col style="width: 10%;">
+                <col style="width: 10%;">
+                <col style="width: 10%;">
             </colgroup>
-            <thead>
+            <thead class="table-light">
                 <tr>
-                    <!-- <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" style="transform: scale(1.5);"></th> -->
                     <th>Постачальник</th>
                     <th>Категорія</th>
                     <th>Назва</th>
@@ -53,13 +52,16 @@
                     <td>{{ item.name }}</td>
                     <td>{{ item.price }}</td>
                     <td>{{ item.status }}</td>
-                    <td><a href="{{ item.url }}" target="_blank">{{ item.url }}</a></td>
+                    <td class="link-cell">
+                        <a href="{{ item.url }}" title="{{ item.url }}" target="_blank" class="link-ellipsis">
+                            {{ item.url }}
+                        </a>
                     </td>
                 </tr>
                 {% endfor %}
                 {% else %}
                 <tr>
-                    <td colspan="4">
+                    <td colspan="6" class="empty-row">
                         Результати відсутні
                     </td>
                 </tr>
@@ -69,8 +71,41 @@
     </form>
 </div>
 
-<script>
+<style>
+    .link-cell {
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 
-</script>
+    .link-ellipsis {
+        display: inline-block;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .link-ellipsis:hover {
+        text-decoration: underline;
+    }
+
+    table {
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    th,
+    td {
+        vertical-align: middle;
+        text-align: left;
+    }
+
+    .empty-row {
+        text-align: center;
+        color: #888;
+    }
+</style>
 
 {% endblock content %}
