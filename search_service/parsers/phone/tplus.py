@@ -1,9 +1,5 @@
 import re
-import time
 from datetime import datetime
-from pathlib import Path
-import requests
-from urllib.parse import unquote
 
 from playwright.sync_api import Playwright, expect, sync_playwright
 
@@ -43,14 +39,31 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     items_ = []
     for i in range(count):
         item = items.nth(i)
-        name = item.locator("a.product-item--name div span").text_content().strip().replace(",", "")
-        url = base_url + item.locator("a.product-item--name").get_attribute("href").strip()
-        price = (
-            item.locator("div.product-item--price span").text_content().strip().replace(",", ".")
+        name = (
+            item.locator("a.product-item--name div span")
+            .text_content()
+            .strip()
+            .replace(",", "")
         )
-        status_none = item.locator(".v-icon.notranslate.mdi.mdi-calendar-clock.theme--dark")
-        status_nth = item.locator(".v-icon.notranslate.mdi.mdi-basket-plus-outline.theme--light")
-        status_offer = item.locator(".v-icon.notranslate.mdi.mdi-human-dolly.theme--dark")
+        url = (
+            base_url
+            + item.locator("a.product-item--name").get_attribute("href").strip()
+        )
+        price = (
+            item.locator("div.product-item--price span")
+            .text_content()
+            .strip()
+            .replace(",", ".")
+        )
+        status_none = item.locator(
+            ".v-icon.notranslate.mdi.mdi-calendar-clock.theme--dark"
+        )
+        status_nth = item.locator(
+            ".v-icon.notranslate.mdi.mdi-basket-plus-outline.theme--light"
+        )
+        status_offer = item.locator(
+            ".v-icon.notranslate.mdi.mdi-human-dolly.theme--dark"
+        )
         if status_nth.count() or status_none.count():
             continue
         status = "В наявності"

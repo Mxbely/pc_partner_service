@@ -1,9 +1,6 @@
-import re
-import time
 from datetime import datetime
 
 import requests
-from playwright.sync_api import Playwright, expect, sync_playwright
 
 from search_service.parsers.base import (
     BaseParser,
@@ -53,8 +50,7 @@ def run(query, filename: str) -> None:
 
 def main(query: str):
 
-    with sync_playwright() as playwright:
-        run(playwright, query, FILE_NAME)
+    run(query, FILE_NAME)
 
 
 if __name__ == "__main__":

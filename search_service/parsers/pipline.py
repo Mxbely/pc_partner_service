@@ -1,4 +1,5 @@
 import os
+from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime
 
 from search_service.parsers.laptop.forlaptop import ForLaptopKievParser
@@ -30,7 +31,15 @@ def make_filename(query: str) -> str:
     return f"{query}.csv"
 
 
+def run_parser(parser):
+    print(f"Running parser for {parser.filename}")
+    parser.parse()
+    print(f"Finished parser for {parser.filename}")
+
+
 def start_pipline(query: str):
+    print(f"Start pipeline")
+    st = datetime.now()
     finalname = make_filename(query)
     if check_file_exists(finalname):
         print(f"File {finalname} already exists. Returning existing file.")
@@ -46,10 +55,12 @@ def start_pipline(query: str):
         TplusParser(query),
     ]
 
-    for parser in parsers:
-        print(f"Start parser: {parser.filename}")
-        parser.parse()
-        print(f"Finished parser: {parser.filename}")
+    max_workers = os.cpu_count() or 1
+    print(f"Using {max_workers} workers for parsing")
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
+        futures = [executor.submit(run_parser, parser) for parser in parsers]
+        for future in futures:
+            future.result()
 
     if os.path.exists(finalname):
         os.remove(finalname)
@@ -60,5 +71,6 @@ def start_pipline(query: str):
                 with open(parser.filename, "r") as file:
                     lines = file.readlines()
                     f.writelines(lines[1:])
-
+    end = datetime.now()
+    print(f"Pipeline finished in {end - st}")
     return finalname
