@@ -34,29 +34,21 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     base_url = "https://suncomp.com.ua"
     url = f"{base_url}/search/?search={query}&description=true&sub_category=true&limit=100"
     page.goto(url)
-    # time.sleep(2)  # Wait for the page to load
     items = page.locator(".product-item-card")
     count = page.locator(".product-item-card").count()
-    # print(f"Found {count} items for query: {query}")
     items_ = []
     for i in range(count):
         item = items.nth(i)
         name = item.locator(".pr-name").text_content().strip().replace(",", "")
-        # print(f"Name: {name}")
         url = item.locator(".pr-name").get_attribute("href").strip()
-        # print(f"URL: {url}")
         price = item.locator(".pr-prices .act span")
-        # print(f"Price: {price}")
         if not price.count():
             price = "Ціна не вказана"
             continue
         price = price.text_content().strip()
         status = item.locator(".pr-prices span")
-        # print(f"Start status")
         if status.count():
-            # print(f"Status founded")
             status = status.last.text_content().strip()
-            # print(f"Status: {status}")
             if status != "в наличии":
                 continue
 
@@ -78,7 +70,6 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
 
 
 def main(query: str):
-
     with sync_playwright() as playwright:
         run(playwright, query, FILE_NAME)
 

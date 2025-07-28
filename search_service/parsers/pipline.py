@@ -10,6 +10,7 @@ from search_service.parsers.phone.all_spares import AllSparesParser
 from search_service.parsers.phone.motorolka import MotorolkaParser
 from search_service.parsers.phone.stylecom import StylecomParser
 from search_service.parsers.phone.tplus import TplusParser
+from search_service.parsers.phone.welcom_mobi import WelcomMobiParser
 
 
 def delete_old_files():
@@ -55,6 +56,7 @@ def start_pipline(query: str):
         SuncompParser(query),
         TplusParser(query),
         GSMForsageParser(query),
+        WelcomMobiParser(query),
     ]
 
     max_workers = os.cpu_count() or 1
