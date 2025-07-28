@@ -4,6 +4,7 @@ from datetime import datetime
 
 from search_service.parsers.laptop.forlaptop import ForLaptopKievParser
 from search_service.parsers.laptop.fornb import ForNBParser
+from search_service.parsers.laptop.gsmforsage import GSMForsageParser
 from search_service.parsers.laptop.suncomp import SuncompParser
 from search_service.parsers.phone.all_spares import AllSparesParser
 from search_service.parsers.phone.motorolka import MotorolkaParser
@@ -53,6 +54,7 @@ def start_pipline(query: str):
         StylecomParser(query),
         SuncompParser(query),
         TplusParser(query),
+        GSMForsageParser(query),
     ]
 
     max_workers = os.cpu_count() or 1
