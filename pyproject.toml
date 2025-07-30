@@ -6,13 +6,16 @@ authors = [
     {name = "Mxbely",email = "mxbely98@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.10,<4.0"
 dependencies = [
     "playwright (>=1.53.0,<2.0.0)",
     "fastapi[standard] (>=0.116.1,<0.117.0)",
     "requests (>=2.32.4,<3.0.0)",
     "isort (>=6.0.1,<7.0.0)",
-    "black (>=25.1.0,<26.0.0)"
+    "black (>=25.1.0,<26.0.0)",
+    "tf-playwright-stealth (>=1.2.0,<2.0.0)",
+    "playwright-stealth (==1.0.6)",
+    "setuptools (<81.0.0)",
 ]
 
 

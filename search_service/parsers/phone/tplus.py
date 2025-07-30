@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+import time
 
 from playwright.sync_api import Playwright, expect, sync_playwright
 
@@ -24,15 +25,19 @@ class TplusParser(BaseParser):
 def run(playwright: Playwright, query: str, filename: str) -> None:
     delete_file(filename)
     browser = playwright.chromium.launch(headless=True)
-    context = browser.new_context(**base_context)
+    context = browser.new_context(**base_context)   
     page = context.new_page()
+    page.set_default_timeout(10000)
     query = re.sub(r"\s+", "+", query)
     base_url = "https://tplus.market"
     url = f"{base_url}/search?search={query}&limit=50"
     page.goto(url)
-    button = page.get_by_role("button", name="Погоджуюсь")
-    if button.is_visible():
-        button.click()
+    page.get_by_role("button", name="Погоджуюсь").click()
+
+    button = page.locator("button.v-btn.v-btn--has-bg.theme--light.v-size--default.primary")
+    if button.count():
+        return
+
     page.wait_for_selector(".product-item")
     items = page.locator(".product-item")
     count = page.locator(".product-item").count()
@@ -93,5 +98,5 @@ def main(query: str):
 
 
 if __name__ == "__main__":
-    query = "батарея acer as"
+    query = "батарея acer AS"
     main(query)
