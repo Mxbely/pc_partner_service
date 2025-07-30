@@ -1,7 +1,9 @@
 import re
 from datetime import datetime
+import time
 
 from playwright.sync_api import Playwright, expect, sync_playwright
+from playwright_stealth import stealth_sync
 
 from search_service.parsers.base import (
     BaseParser,
@@ -23,16 +25,42 @@ class TplusParser(BaseParser):
 
 def run(playwright: Playwright, query: str, filename: str) -> None:
     delete_file(filename)
-    browser = playwright.chromium.launch(headless=True)
+    browser = playwright.chromium.launch(headless=False, 
+        #  args=["--disable-blink-features=AutomationControlled"]
+        args=[
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-blink-features=AutomationControlled",
+            "--disable-gpu",
+            "--disable-dev-shm-usage",
+            "--single-process",
+            "--no-zygote"
+        ]
+                                               )
     context = browser.new_context(**base_context)
     page = context.new_page()
+    stealth_sync(page)
+    page.set_default_timeout(10000)
     query = re.sub(r"\s+", "+", query)
     base_url = "https://tplus.market"
     url = f"{base_url}/search?search={query}&limit=50"
     page.goto(url)
-    button = page.get_by_role("button", name="Погоджуюсь")
+    time.sleep(100)
+
+    # page.wait_for_timeout(1000)
+    # page.wait_for_selector("div.cookie-alert span.v-btn__content")
+    # button = page.get_by_role("button", name="Погоджуюсь")
+    button = page.locator("div.cookie-alert span.v-btn__content")
     if button.is_visible():
         button.click()
+        
+    # page.wait_for_timeout(1000)
+
+
+    html = page.content()
+    with open("headless_debug.html", "w", encoding="utf-8") as f:
+        f.write(html)
+
     page.wait_for_selector(".product-item")
     items = page.locator(".product-item")
     count = page.locator(".product-item").count()
@@ -93,5 +121,5 @@ def main(query: str):
 
 
 if __name__ == "__main__":
-    query = "батарея acer as"
+    query = "батарея acer AS"
     main(query)

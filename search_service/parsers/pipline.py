@@ -1,10 +1,12 @@
 import os
 from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime
+from playwright.sync_api import TimeoutError
 
 from search_service.parsers.laptop.forlaptop import ForLaptopKievParser
 from search_service.parsers.laptop.fornb import ForNBParser
 from search_service.parsers.laptop.gsmforsage import GSMForsageParser
+from search_service.parsers.laptop.smartparts import SmartpartsParser
 from search_service.parsers.laptop.suncomp import SuncompParser
 from search_service.parsers.phone.all_spares import AllSparesParser
 from search_service.parsers.phone.motorolka import MotorolkaParser
@@ -35,8 +37,12 @@ def make_filename(query: str) -> str:
 
 def run_parser(parser):
     print(f"Running parser for {parser.filename}")
-    parser.parse()
-    print(f"Finished parser for {parser.filename}")
+    try:
+        parser.parse()
+    except TimeoutError:
+        print(f"Timeout for {parser.filename}")
+    else:
+        print(f"Finished parser for {parser.filename}")
 
 
 def start_pipline(query: str):
@@ -54,9 +60,10 @@ def start_pipline(query: str):
         ForNBParser(query),
         StylecomParser(query),
         SuncompParser(query),
-        TplusParser(query),
+        TplusParser(query), # Difficult
         GSMForsageParser(query),
         WelcomMobiParser(query),
+        SmartpartsParser(query), # CPU intensive
     ]
 
     max_workers = os.cpu_count() or 1

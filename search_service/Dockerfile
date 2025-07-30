@@ -1,6 +1,9 @@
 # FROM python:3.12-slim as base
 FROM mcr.microsoft.com/playwright/python:v1.53.0-jammy
 
+# RUN apt-get update && apt-get install -y locales && locale-gen uk_UA.UTF-8
+# ENV LANG=uk_UA.UTF-8
+
 RUN pip install --upgrade pip && \
     pip install poetry
 
@@ -18,4 +21,5 @@ ENV PYTHONPATH=/app
 
 EXPOSE 8000
 
-CMD ["poetry", "run", "uvicorn", "search_service.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# CMD "xvfb-run -a poetry run uvicorn search_service.main:app --host 0.0.0.0 --port 8000"
+CMD ["xvfb-run", "-a", "poetry", "run", "uvicorn", "search_service.main:app", "--host", "0.0.0.0", "--port", "8000"]
