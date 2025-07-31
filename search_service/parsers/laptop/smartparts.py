@@ -28,7 +28,6 @@ def ascii(text: str) -> str:
 
 def run(playwright: Playwright, query: str, filename: str) -> None:
     delete_file(filename)
-    # st = datetime.now()
     browser = playwright.chromium.launch(headless=True)
     context = browser.new_context()
     page = context.new_page()
@@ -75,8 +74,6 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
             break
     write_to_csv(items_, filename)
     del items_
-    # nd = datetime.now()
-    # print(f"Time taken: {nd - st}")
 
     # ---------------------
     context.close()
