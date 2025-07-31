@@ -55,11 +55,13 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
             base_url
             + item.locator("a.product-item--name").get_attribute("href").strip()
         )
-        price = (
+        price = float(
             item.locator("div.product-item--price span")
             .text_content()
-            .strip()
             .replace(",", ".")
+            .replace("\xa0", "")
+            .replace("грн", "")
+            .strip()
         )
         status_none = item.locator(
             ".v-icon.notranslate.mdi.mdi-calendar-clock.theme--dark"
@@ -84,6 +86,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
             status=status,
         )
         items_.append(item_data)
+    items_ = sorted(items_, key=lambda x: x.price, reverse=True)
     write_to_csv(items_, filename)
     del items_
 

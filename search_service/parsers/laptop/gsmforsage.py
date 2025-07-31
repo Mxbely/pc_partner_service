@@ -47,11 +47,12 @@ def run(query, filename: str) -> None:
             src=SOURCE,
             category="all",
             name=item["name"].replace(",", ""),
-            price=item["price"].replace(",", "."),
+            price=float(item["price"].replace(",", ".").replace(" грн.", "")),
             url=item["url"],
             status="В наявності",
         )
         items_.append(item)
+    items_ = sorted(items_, key=lambda x: x.price, reverse=True)
     write_to_csv(items_, filename)
     del items_
 

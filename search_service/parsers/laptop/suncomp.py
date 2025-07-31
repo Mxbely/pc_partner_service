@@ -45,7 +45,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
         if not price.count():
             price = "Ціна не вказана"
             continue
-        price = price.text_content().strip()
+        price = float(price.text_content().replace(" ", "").strip())
         status = item.locator(".pr-prices span")
         if status.count():
             status = status.last.text_content().strip()
@@ -61,6 +61,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
             status=status,
         )
         items_.append(item_data)
+    items_ = sorted(items_, key=lambda x: x.price, reverse=True)
     write_to_csv(items_, filename)
     del items_
 

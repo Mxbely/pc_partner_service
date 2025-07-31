@@ -41,7 +41,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
         name = items.nth(i).locator(".product-name a").inner_text()
         name = name.replace(",", "")
         link = items.nth(i).locator(".product-name a").get_attribute("href")
-        price = items.nth(i).locator(".price .price_no_format").inner_text()
+        price = float(items.nth(i).locator(".price .price_no_format").inner_text().removesuffix("грн."))
         status = items.nth(i).locator(".stock-status").inner_text()
         if status == "Нет в наличии":
             continue
@@ -55,7 +55,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
                 status=status,
             )
         )
-
+    items_ = sorted(items_, key=lambda x: x.price, reverse=True)
     write_to_csv(items_, filename)
 
     # ---------------------

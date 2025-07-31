@@ -67,7 +67,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
         status = "В наявності"
         price1 = item.locator("div.d_i-b span").first.text_content().strip()
         price2 = item.locator("div.d_i-b sup").first.text_content().strip()
-        price = f"{price1}.{price2}"
+        price = float(f"{price1}.{price2}")
 
         item_data = Item(
             src=SOURCE,
@@ -78,6 +78,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
             status=status,
         )
         items_.append(item_data)
+    items_ = sorted(items_, key=lambda x: x.price, reverse=True)
     write_to_csv(items_, filename)
     del items_
 

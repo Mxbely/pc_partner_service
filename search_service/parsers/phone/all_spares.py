@@ -69,11 +69,12 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
             src=SOURCE,
             category="ALL SPARES",
             name=name,
-            price=price,
+            price=float(price),
             url=url,
             status=status,
         )
         items_.append(item_data)
+    items_ = sorted(items_, key=lambda x: x.price, reverse=True)
     write_to_csv(items_, filename)
     del items_
 

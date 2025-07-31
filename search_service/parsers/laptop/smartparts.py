@@ -58,7 +58,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
                 src=SOURCE,
                 category="ALL",
                 name=name,
-                price=price,
+                price=float(price),
                 url=url,
                 status=status,
             )
@@ -72,6 +72,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
             # page.goto(url)
         else:
             break
+    items_ = sorted(items_, key=lambda x: x.price, reverse=True)
     write_to_csv(items_, filename)
     del items_
 

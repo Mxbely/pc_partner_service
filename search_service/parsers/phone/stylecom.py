@@ -40,8 +40,8 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     for i in range(count):
         item = items.nth(i)
         name = item.locator("a").first.get_attribute("title").strip().replace(",", "")
-        price = (
-            item.locator("div.product-tile__price span").first.text_content().strip()
+        price = float(
+            item.locator("div.product-tile__price span").first.text_content().replace("грн", "").replace(" ", "").strip()
         )
         url = item.locator("a").first.get_attribute("href").strip()
         status = (
@@ -61,6 +61,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
             status=status,
         )
         items_.append(item_data)
+    items_ = sorted(items_, key=lambda x: x.price, reverse=True)
     write_to_csv(items_, filename)
     del items_
 
