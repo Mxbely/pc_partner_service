@@ -3,6 +3,7 @@ from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime
 from playwright.sync_api import TimeoutError
 
+from search_service.parsers.laptop.allnotebookparts import AllnotebookpartsParser
 from search_service.parsers.laptop.forlaptop import ForLaptopKievParser
 from search_service.parsers.laptop.fornb import ForNBParser
 from search_service.parsers.laptop.gsmforsage import GSMForsageParser
@@ -68,6 +69,7 @@ def start_pipline(query: str):
         SmartpartsParser(query), # CPU intensive
         VseplusParser(query),
         ArtmobileParser(query),
+        AllnotebookpartsParser(query),
     ]
 
     max_workers = os.cpu_count() or 1
