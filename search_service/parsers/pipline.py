@@ -9,6 +9,7 @@ from search_service.parsers.laptop.gsmforsage import GSMForsageParser
 from search_service.parsers.laptop.smartparts import SmartpartsParser
 from search_service.parsers.laptop.suncomp import SuncompParser
 from search_service.parsers.phone.all_spares import AllSparesParser
+from search_service.parsers.phone.artmobile import ArtmobileParser
 from search_service.parsers.phone.motorolka import MotorolkaParser
 from search_service.parsers.phone.stylecom import StylecomParser
 from search_service.parsers.phone.tplus import TplusParser
@@ -66,6 +67,7 @@ def start_pipline(query: str):
         WelcomMobiParser(query),
         SmartpartsParser(query), # CPU intensive
         VseplusParser(query),
+        ArtmobileParser(query),
     ]
 
     max_workers = os.cpu_count() or 1
