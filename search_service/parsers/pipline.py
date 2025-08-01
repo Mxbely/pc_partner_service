@@ -12,6 +12,7 @@ from search_service.parsers.phone.all_spares import AllSparesParser
 from search_service.parsers.phone.motorolka import MotorolkaParser
 from search_service.parsers.phone.stylecom import StylecomParser
 from search_service.parsers.phone.tplus import TplusParser
+from search_service.parsers.phone.vseplus import VseplusParser
 from search_service.parsers.phone.welcom_mobi import WelcomMobiParser
 
 
@@ -60,10 +61,11 @@ def start_pipline(query: str):
         ForNBParser(query),
         StylecomParser(query),
         SuncompParser(query),
-        TplusParser(query), # Difficult
+        TplusParser(query),
         GSMForsageParser(query),
         WelcomMobiParser(query),
         SmartpartsParser(query), # CPU intensive
+        VseplusParser(query),
     ]
 
     max_workers = os.cpu_count() or 1
