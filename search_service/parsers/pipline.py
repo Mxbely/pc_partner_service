@@ -8,6 +8,7 @@ from search_service.parsers.laptop.forlaptop import ForLaptopKievParser
 from search_service.parsers.laptop.fornb import ForNBParser
 from search_service.parsers.laptop.gsmforsage import GSMForsageParser
 from search_service.parsers.laptop.laptopparts import LaptoppartsParser
+from search_service.parsers.laptop.radiodetal import RadiodetalParser
 from search_service.parsers.laptop.smartparts import SmartpartsParser
 from search_service.parsers.laptop.suncomp import SuncompParser
 from search_service.parsers.phone.all_spares import AllSparesParser
@@ -68,6 +69,7 @@ def start_pipline(query: str):
         ArtmobileParser(query),
         AllnotebookpartsParser(query),
         LaptoppartsParser(query),
+        RadiodetalParser(query),
     ]
 
     max_workers = int(os.cpu_count() * 0.75) or 1
