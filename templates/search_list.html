@@ -7,22 +7,31 @@
 {% block content %}
 
 <br>
-
 <div class="base-container">
     <h2 align="center">Список товарів</h2>
 
-    <div id="alert" class="alert d-none" role="alert" style="white-space: pre-line;"></div>
+    <!-- Повідомлення про помилки -->
+    <div id="alert" class="alert alert-danger d-none" role="alert" style="white-space: pre-line;"></div>
 
+    <!-- Поле пошуку і кнопка -->
     <div class="buttons-block default-margin-top">
-        <form action="/search" method="get">
-            <input type="text" name="query" placeholder="Пошук" />
-            <button type="submit" class="btn btn-primary">Пошук</button>   
-        </form>
-        <div>
-            <span class="badge badge-info">Знайдено {{ total_items }} товарів</span>
-            <span class="badge badge-secondary">Запит: "{{ query }}"</span>
+        <input type="text" name="query" placeholder="Пошук" class="form-control d-inline-block w-auto me-2" />
+        <button type="button" onclick="StartSearch()" class="btn btn-primary">Пошук</button>
+
+        <!-- Статистика пошуку -->
+        <div class="mt-2">
+            <span class="badge bg-info" id="result-count">Знайдено 0 товарів</span>
+            <span class="badge bg-secondary" id="result-query">Запит: ""</span>
         </div>
     </div>
+
+    <!-- Індикатор завантаження -->
+    <div id="search-loading" class="d-none text-center my-4">
+        <div class="spinner-border text-primary" role="status"></div>
+        <div class="mt-2">Йде пошук, будь ласка, зачекайте...</div>
+    </div>
+
+    <!-- Таблиця результатів -->
     <form class="mt-3">
         <table class="table table-bordered table-striped">
             <colgroup>
@@ -43,33 +52,87 @@
                     <th>Посилання</th>
                 </tr>
             </thead>
-            <tbody>
-                {% if item_list %}
-                {% for item in item_list %}
+            <tbody id="results-body">
                 <tr>
-                    <td>{{ item.src }}</td>
-                    <td>{{ item.category }}</td>
-                    <td>{{ item.name }}</td>
-                    <td>{{ item.price }}</td>
-                    <td>{{ item.status }}</td>
-                    <td class="link-cell">
-                        <a href="{{ item.url }}" title="{{ item.url }}" target="_blank" class="link-ellipsis">
-                            Перейти
-                        </a>
-                    </td>
+                    <td colspan="6" class="text-center">Немає результатів</td>
                 </tr>
-                {% endfor %}
-                {% else %}
-                <tr>
-                    <td colspan="6" class="empty-row">
-                        Результати відсутні
-                    </td>
-                </tr>
-                {% endif %}
             </tbody>
         </table>
     </form>
 </div>
+
+<script>
+    function StartSearch() {
+        const query = document.querySelector('input[name="query"]').value;
+        if (!query) {
+            alert("Будь ласка, введіть запит для пошуку.");
+            return;
+        }
+        const checkedFilters = Array.from(document.querySelectorAll('input[name="filters"]:checked'))
+            .map(cb => cb.value);
+        if (checkedFilters.length === 0) {
+            alert("Будь ласка, оберіть хоча б один фільтр.");
+            return;
+        }
+        const url = "{{ url_for('search_post') }}";
+        const data = { "query": query, "filters": checkedFilters };
+
+        // Показати індикатор і заблокувати кнопку
+        document.getElementById("search-loading").classList.remove("d-none");
+        const searchBtn = document.querySelector("button[onclick='StartSearch()']");
+        searchBtn.disabled = true;
+        searchBtn.textContent = "Пошук...";
+        
+
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => {
+                if (!response.ok) throw new Error("HTTP error " + response.status);
+                return response.json();
+            })
+            .then(json => {
+                const tbody = document.getElementById("results-body");
+                tbody.innerHTML = "";
+
+                const items = json.items;
+                if (items.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center">Немає результатів</td></tr>';
+                } else {
+                    for (let item of items) {
+                        const row = `
+                    <tr>
+                        <td>${item.src}</td>
+                        <td>${item.category}</td>
+                        <td>${item.name}</td>
+                        <td>${item.price.toFixed(2)}</td>
+                        <td>${item.status}</td>
+                        <td><a href="${item.url}" target="_blank">Перейти</a></td>
+                    </tr>
+                `;
+                        tbody.insertAdjacentHTML("beforeend", row);
+                    }
+                }
+
+                document.getElementById("result-count").textContent = `Знайдено ${items.length} товарів`;
+                document.getElementById("result-query").textContent = `Запит: "${json.query}"`;
+            })
+            .catch(error => {
+                console.error("Помилка:", error);
+                alert("Помилка при виконанні запиту.");
+            })
+            .finally(() => {
+                // Приховати індикатор та увімкнути кнопку
+                document.getElementById("search-loading").classList.add("d-none");
+                searchBtn.disabled = false;
+                searchBtn.textContent = "Пошук";
+            });
+    }
+</script>
 
 <style>
     .link-cell {

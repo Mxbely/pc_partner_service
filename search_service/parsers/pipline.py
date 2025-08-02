@@ -3,6 +3,7 @@ from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime
 from playwright.sync_api import TimeoutError
 
+from search_service.parsers.base import BaseParser
 from search_service.parsers.laptop.allnotebookparts import AllnotebookpartsParser
 from search_service.parsers.laptop.forlaptop import ForLaptopKievParser
 from search_service.parsers.laptop.fornb import ForNBParser
@@ -20,6 +21,24 @@ from search_service.parsers.phone.vseplus import VseplusParser
 from search_service.parsers.phone.welcom_mobi import WelcomMobiParser
 
 
+filters = {
+    "ForLaptop": ForLaptopKievParser,
+    "Motorolka": MotorolkaParser,  # CPU intensive
+    "AllSpares": AllSparesParser,
+    "ForNB": ForNBParser,
+    "Stylecom": StylecomParser,
+    "SunComp": SuncompParser,
+    "TPlus": TplusParser,
+    "GSMForsage": GSMForsageParser,
+    "WelcomMobi": WelcomMobiParser,
+    "SmartParts": SmartpartsParser,  # CPU intensive
+    "Vseplus": VseplusParser,
+    "Artmobile": ArtmobileParser,
+    "AllNotebookParts": AllnotebookpartsParser,
+    "LaptopParts": LaptoppartsParser,
+    "RadioDetal": RadiodetalParser,
+}
+
 def delete_old_files():
     current_time = datetime.now()
     for filename in os.listdir("."):
@@ -35,9 +54,10 @@ def check_file_exists(filename: str) -> bool:
     return os.path.exists(filename)
 
 
-def make_filename(query: str) -> str:
+def make_filename(query: str, parsers: list[BaseParser]) -> str:
     query = query.replace(" ", "_")
-    return f"{query}.csv"
+    pars_names = "_".join([parser.__class__.__name__ for parser in parsers])
+    return f"{query}_{pars_names}.csv"
 
 
 def run_parser(parser):
@@ -47,30 +67,12 @@ def run_parser(parser):
         print(f"Timeout for {parser.filename}")
 
 
-def start_pipline(query: str):
+def start_pipline(query: str, parsers: list[BaseParser]) -> str:
     st = datetime.now()
-    finalname = make_filename(query)
+    finalname = make_filename(query, parsers)
     if check_file_exists(finalname):
         print(f"File {finalname} already exists. Returning existing file.")
         return finalname
-
-    parsers = [
-        ForLaptopKievParser(query),
-        MotorolkaParser(query),
-        AllSparesParser(query),
-        ForNBParser(query),
-        StylecomParser(query),
-        SuncompParser(query),
-        TplusParser(query),
-        GSMForsageParser(query),
-        WelcomMobiParser(query),
-        SmartpartsParser(query), # CPU intensive
-        VseplusParser(query),
-        ArtmobileParser(query),
-        AllnotebookpartsParser(query),
-        LaptoppartsParser(query),
-        RadiodetalParser(query),
-    ]
 
     max_workers = int(os.cpu_count() * 0.75) or 1
     print(f"Using {max_workers} workers for parsing")
