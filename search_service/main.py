@@ -24,7 +24,18 @@ def search(request: Request, query: str = ""):
         print(f"Started query: {query}")
         filename = start_pipline(query)
         with open(filename, "r") as f:
-            items = [Item(*line.strip().split(",")) for line in f.readlines()]
+            items = []
+            for line in f.readlines():
+                lines = line.strip().split(",")
+                item = Item(
+                    src=lines[0],
+                    category=lines[1],
+                    name=lines[2],
+                    price=float(lines[3]),
+                    url=",".join(lines[4:-1]),
+                    status=lines[-1],
+                )
+                items.append(item)
         context = {
             "request": request,
             "query": query,

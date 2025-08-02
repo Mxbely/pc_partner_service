@@ -30,8 +30,9 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     browser = playwright.chromium.launch(headless=True)
     context = browser.new_context()
     page = context.new_page()
-    page.set_default_timeout(10000)
     query = re.sub(r"\s+", "+", query)
+    separated_query = query.split("+")
+
     page_number = 1
     base_url = "https://vseplus.com"
     url = f"{base_url}/search/p-{page_number}?s=-price&q={query}"
@@ -51,6 +52,8 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
         for i in range(count):
             item = items.nth(i)
             name = item.locator("div.card-product__info a.card-product__link").text_content().strip().replace(",", "")
+            if not any(word.lower() in name.lower() for word in separated_query):
+                continue
             item_url = base_url + item.locator("div.card-product__info a.card-product__link").get_attribute("href").strip()
             price = float(
                 item.locator("p.product-price__current strong").text_content().replace("\xa0", "").strip()
@@ -65,7 +68,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
 
             item_data = Item(
                 src=SOURCE,
-                category="all",
+                category="All",
                 name=name,
                 price=price,
                 url=item_url,

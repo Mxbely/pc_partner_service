@@ -38,10 +38,10 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     page.goto(url)
     items_ = []
     while True:
-        page.wait_for_selector(".cs-product-gallery__item")
         items = page.locator(".cs-product-gallery__item")
         count = page.locator(".cs-product-gallery__item").count()
-        # print(f"Count: {count}")
+        if count == 0:
+            break
         for i in range(count):
             item = items.nth(i)
             status = item.locator("span.cs-goods-data__state").text_content().strip()
@@ -49,14 +49,17 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
                 continue
             name = item.locator("div.cs-product-gallery__title a.cs-goods-title").text_content().strip().replace(",", "")
             if not any(word.lower() in name.lower() for word in separated_query):
-                # print(f"Words not found in {name}")
                 continue
             url = base_url + item.locator("div.cs-product-gallery__title a.cs-goods-title").get_attribute("href").strip()
-            price = ascii(item.locator("div.cs-goods-price span.cs-goods-price__value_type_current").text_content().strip())
-
+            price = item.locator("div.cs-goods-price span.cs-goods-price__value_type_current").text_content().strip()
+            if price == "Ціну уточнюйте":
+                continue
+            price = price.replace("₴", "").replace("\xa0", "").replace(" ", "").replace(",", ".")
+            if not price:
+                continue
             item_data = Item(
                 src=SOURCE,
-                category="ALL",
+                category="All",
                 name=name,
                 price=float(price),
                 url=url,
@@ -69,6 +72,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
             if "page_6" in url:
                 break
             next_button.click()
+            page.wait_for_selector(".cs-product-gallery__item")
             # page.goto(url)
         else:
             break

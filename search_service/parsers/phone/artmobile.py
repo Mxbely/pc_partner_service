@@ -28,11 +28,11 @@ def ascii(text: str) -> str:
 
 def run(playwright: Playwright, query: str, filename: str) -> None:
     delete_file(filename)
-    browser = playwright.chromium.launch(headless=False)
+    browser = playwright.chromium.launch(headless=True)
     context = browser.new_context()
     page = context.new_page()
-    page.set_default_timeout(10000)
     query = re.sub(r"\s+", "+", query)
+    separated_query = query.split("+")
 
     base_url = "https://artmobile.ua"
     url = f"{base_url}/search?term={query}&perPage=96&sort=price.desc"
@@ -49,6 +49,8 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     for i in range(count):
         item = items.nth(i)
         name = item.locator("div.product-title a").text_content().strip().replace(",", "")
+        if not any(word.lower() in name.lower() for word in separated_query):
+            continue
         item_url = item.locator("div.product-title a").get_attribute("href").strip()
         price = float(
             item.locator("div.price").text_content().strip().replace("грн", "").replace("\xa0", "")
@@ -63,7 +65,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
 
         item_data = Item(
             src=SOURCE,
-            category="all",
+            category="All",
             name=name,
             price=price,
             url=item_url,

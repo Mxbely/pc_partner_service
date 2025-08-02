@@ -31,6 +31,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     context = browser.new_context()
     page = context.new_page()
     query = re.sub(r"\s+", "+", query)
+    separated_query = query.split("+")
     base_url = "https://stylecom.ua/index.php"
     url = f"{base_url}?route=elasticsearch/elasticsearch/autocomplete&_route_=ua&search={query}"
     page.goto(url)
@@ -40,9 +41,14 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     for i in range(count):
         item = items.nth(i)
         name = item.locator("a").first.get_attribute("title").strip().replace(",", "")
-        price = float(
-            item.locator("div.product-tile__price span").first.text_content().replace("грн", "").replace(" ", "").strip()
-        )
+        if not any(word.lower() in name.lower() for word in separated_query):
+            continue
+        price = item.locator("div.product-tile__price span").first.text_content()
+        price = price.replace("грн", "").replace(" ", "").strip()
+        if not price:
+            continue
+        price = float(price)
+        
         url = item.locator("a").first.get_attribute("href").strip()
         status = (
             item.locator(".product-tile__info .product-tile__stock")
@@ -54,7 +60,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
 
         item_data = Item(
             src=SOURCE,
-            category="all",
+            category="All",
             name=name,
             price=price,
             url=url,

@@ -45,6 +45,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     
     page = context.new_page()
     query = re.sub(r"\s+", "+", query)
+    separated_query = query.split("+")
     base_url = "https://welcome-mobi.com.ua"
     url = f"{base_url}/shop/search?text={query}"
 
@@ -60,6 +61,8 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     for i in range(count):
         item = items.nth(i)
         name = item.locator(".title").text_content().strip().replace(",", "")
+        if not any(word.lower() in name.lower() for word in separated_query):
+            continue
         url = item.locator("a").get_attribute("href").strip()
         status1 = item.locator("div.btn.btn-def button")
         if status1.count():
@@ -71,7 +74,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
 
         item_data = Item(
             src=SOURCE,
-            category="ALL",
+            category="All",
             name=name,
             price=price,
             url=url,

@@ -28,8 +28,8 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     browser = playwright.chromium.launch(headless=True)
     context = browser.new_context(**base_context)   
     page = context.new_page()
-    page.set_default_timeout(10000)
     query = re.sub(r"\s+", "+", query)
+    separated_query = query.split("+")
     base_url = "https://tplus.market"
     url = f"{base_url}/search?search={query}&limit=50"
     page.goto(url)
@@ -51,6 +51,8 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
             .strip()
             .replace(",", "")
         )
+        if not any(word.lower() in name.lower() for word in separated_query):
+            continue
         url = (
             base_url
             + item.locator("a.product-item--name").get_attribute("href").strip()
@@ -79,7 +81,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
             status = "Можна замовити"
         item_data = Item(
             src=SOURCE,
-            category="all",
+            category="All",
             name=name,
             price=price,
             url=url,
@@ -102,5 +104,6 @@ def main(query: str):
 
 
 if __name__ == "__main__":
-    query = "батарея acer AS"
+    # query = "батарея acer AS"
+    query = "SSD 25 gb"
     main(query)

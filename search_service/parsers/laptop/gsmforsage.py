@@ -45,7 +45,7 @@ def run(query, filename: str) -> None:
             continue
         item = Item(
             src=SOURCE,
-            category="all",
+            category="All",
             name=item["name"].replace(",", ""),
             price=float(item["price"].replace(",", ".").replace(" грн.", "")),
             url=item["url"],

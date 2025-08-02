@@ -31,6 +31,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     context = browser.new_context()
     page = context.new_page()
     query = re.sub(r"\s+", "+", query)
+    separated_query = query.split("+")
     base_url = "https://www.4nb.com.ua"
     url = f"{base_url}/search?search_query={query}"
     page.goto(url)
@@ -42,6 +43,8 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
         name_element = item.locator(".right-block h5").locator("a").nth(0)
         name = name_element.text_content().strip().replace(",", "")
         name = name.replace(",", "")
+        if not any(word.lower() in name.lower() for word in separated_query):
+            continue
         price = item.locator(".content_price span")
         if price.count():
             price = float(ascii(price.text_content().strip().replace(",", ".").replace(" ", "")))
@@ -59,7 +62,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
 
         item_data = Item(
             src=SOURCE,
-            category="ALL 4NB",
+            category="All",
             name=name,
             price=price,
             url=url,

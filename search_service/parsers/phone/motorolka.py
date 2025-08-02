@@ -30,7 +30,7 @@ def run(query, filename: str) -> None:
     item_groups = data.get("results", {}).get("item_groups", {})
     items_ = []
     for group in item_groups.values():
-        category_name = group["category"]["name"]
+        category_name = group["category"]["name"].replace(",", "/")
         for item in group["items"].values():
             price = item["price"]
             if not price:
@@ -39,7 +39,7 @@ def run(query, filename: str) -> None:
                 src=SOURCE,
                 category=category_name,
                 name=item["name"].replace(",", ""),
-                price=float(item["price"]),
+                price=float(item["price"].replace(",", ".")),
                 url=item["url"],
                 status="В наявності",
             )

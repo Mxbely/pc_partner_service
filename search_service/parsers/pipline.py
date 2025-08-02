@@ -7,6 +7,7 @@ from search_service.parsers.laptop.allnotebookparts import AllnotebookpartsParse
 from search_service.parsers.laptop.forlaptop import ForLaptopKievParser
 from search_service.parsers.laptop.fornb import ForNBParser
 from search_service.parsers.laptop.gsmforsage import GSMForsageParser
+from search_service.parsers.laptop.laptopparts import LaptoppartsParser
 from search_service.parsers.laptop.smartparts import SmartpartsParser
 from search_service.parsers.laptop.suncomp import SuncompParser
 from search_service.parsers.phone.all_spares import AllSparesParser
@@ -39,17 +40,13 @@ def make_filename(query: str) -> str:
 
 
 def run_parser(parser):
-    print(f"Running parser for {parser.filename}")
     try:
         parser.parse()
     except TimeoutError:
         print(f"Timeout for {parser.filename}")
-    else:
-        print(f"Finished parser for {parser.filename}")
 
 
 def start_pipline(query: str):
-    print(f"Start pipeline")
     st = datetime.now()
     finalname = make_filename(query)
     if check_file_exists(finalname):
@@ -70,9 +67,10 @@ def start_pipline(query: str):
         VseplusParser(query),
         ArtmobileParser(query),
         AllnotebookpartsParser(query),
+        LaptoppartsParser(query),
     ]
 
-    max_workers = os.cpu_count() or 1
+    max_workers = int(os.cpu_count() * 0.75) or 1
     print(f"Using {max_workers} workers for parsing")
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         futures = [executor.submit(run_parser, parser) for parser in parsers]

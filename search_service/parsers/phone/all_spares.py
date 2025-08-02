@@ -67,7 +67,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
 
         item_data = Item(
             src=SOURCE,
-            category="ALL SPARES",
+            category="All",
             name=name,
             price=float(price),
             url=url,

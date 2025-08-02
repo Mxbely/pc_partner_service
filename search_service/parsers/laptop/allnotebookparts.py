@@ -31,8 +31,8 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     browser = playwright.chromium.launch(headless=True)
     context = browser.new_context()
     page = context.new_page()
-    page.set_default_timeout(10000)
     query = re.sub(r"\s+", "+", query)
+    separated_query = query.split("+")
 
     base_url = "https://allnotebookparts.com.ua"
     url = f"{base_url}/ua/site_search?search_term={query}"
@@ -51,10 +51,13 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
         for i in range(count):
             item = items.nth(i)
             name = item.locator("div.cs-goods-title-wrap a.cs-goods-title").text_content().strip().replace(",", "")
+            if not any(word.lower() in name.lower() for word in separated_query):
+                continue
             item_url = base_url + item.locator("div.cs-goods-title-wrap a.cs-goods-title").get_attribute("href").strip()
-            price = float(
-                item.locator("div.cs-goods-price.cs-product-gallery__price span.cs-goods-price__value").first.text_content().strip().replace("₴", "").replace("\xa0", "")
-            )
+            price = item.locator("div.cs-goods-price.cs-product-gallery__price span.cs-goods-price__value").first.text_content().strip()
+            if price == "Ціну уточнюйте":
+                continue
+            price = float(price.replace("від", "").replace("/пара", "").replace("₴", "").replace("\xa0", "").replace(" ", "").replace(",", "."))
             status = (
                 item.locator("span.cs-goods-data__state").first
                 .text_content()
@@ -65,7 +68,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
 
             item_data = Item(
                 src=SOURCE,
-                category="all",
+                category="All",
                 name=name,
                 price=price,
                 url=item_url,

@@ -1,4 +1,5 @@
 from datetime import datetime
+import re
 
 from playwright.sync_api import Playwright, expect, sync_playwright
 
@@ -24,9 +25,11 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     delete_file(filename)
     browser = playwright.chromium.launch(headless=True)
     context = browser.new_context(**base_context)
+    query = re.sub(r"\s+", "+", query)
+    separated_query = query.split("+")
     page = context.new_page()
-    url = f"https://4laptop.kiev.ua/index.php?route=product/search&search={query}&limit=500"
-
+    base_url = "https://4laptop.kiev.ua"
+    url = f"{base_url}/index.php?route=product/search&search={query}&limit=500"
     page.goto(url)
 
     selector = ".category-page .product-layout"
@@ -40,15 +43,17 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     for i in range(items.count()):
         name = items.nth(i).locator(".product-name a").inner_text()
         name = name.replace(",", "")
+        if not any(word.lower() in name.lower() for word in separated_query):
+            continue
         link = items.nth(i).locator(".product-name a").get_attribute("href")
-        price = float(items.nth(i).locator(".price .price_no_format").inner_text().removesuffix("грн."))
+        price = float(items.nth(i).locator(".price .price_no_format").inner_text().replace("грн.", "").replace(" ", ""))
         status = items.nth(i).locator(".stock-status").inner_text()
         if status == "Нет в наличии":
             continue
         items_.append(
             Item(
                 src=SOURCE,
-                category="all",
+                category="All",
                 name=name,
                 price=price,
                 url=link,
