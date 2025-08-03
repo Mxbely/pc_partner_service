@@ -12,11 +12,11 @@ from search_service.parsers.base import (
     write_to_csv,
 )
 
-SOURCE = "laptopparts.com.ua"
-FILE_NAME = f"laptopparts_{datetime.today().strftime('%Y-%m-%d_%H-%M')}.csv"
+SOURCE = "dfi.ua"
+FILE_NAME = f"dfi_{datetime.today().strftime('%Y-%m-%d_%H-%M')}.csv"
 
 
-class LaptoppartsParser(BaseParser):
+class DFIParser(BaseParser):
     def parse(self):
         with sync_playwright() as playwright:
             run(playwright, self.query, self.filename)
@@ -34,13 +34,12 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     query = re.sub(r"\s+", "+", query)
     separated_query = query.split("+")
 
-    base_url = "https://laptopparts.com.ua"
-    url = f"{base_url}/ua/site_search?search_term={query}&product_items_per_page=48"
+    base_url = "https://dfi.ua/ua"
+    url = f"{base_url}/index.php?route=product/search&search={query}&limit=100"
     page.goto(url)
-    selector = "li.b-product-gallery__item"
-    empty = page.locator("span.b-search-result-info__counter").text_content().strip()
-    counter = int(empty.split(" ")[0])
-    if counter == 0:
+    selector = "div.product-thumb"
+    empty = page.locator("#mfilter-content-container >> text=Немає товарів, які відповідають критеріям пошуку.")
+    if empty.count() == 1:
         return
 
     items_ = []
@@ -49,21 +48,17 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
 
     for i in range(count):
         item = items.nth(i)
-        name = item.locator("div.b-product-gallery__header a.b-product-gallery__title").text_content().strip().replace(",", "")
-        if not any(word.lower() in name.lower() for word in separated_query):
-            continue
-        item_url = base_url + item.locator("div.b-product-gallery__header a.b-product-gallery__title").get_attribute("href").strip()
-        price = float(
-            item.locator("div.b-product-gallery__prices span.b-product-gallery__current-price").text_content().replace("/комплект", "").replace(",", ".").replace("₴", "").replace(" ", "").strip()
-        )
+        name = item.locator("div.product-name a").text_content().strip().replace(",", "")
+        item_url = item.locator("div.product-name a").get_attribute("href").strip()
+        price = float(item.locator("p.price").text_content().strip().replace("грн", "").replace(" ", ""))
         status = (
-            item.locator("div.b-product-gallery__data span.b-product-gallery__state")
+            item.locator("div.actions div.cart button.btn.btn-general span")
             .text_content()
             .strip()
         )
         if status == "Немає в наявності":
             continue
-
+        status = "В наявності"
         item_data = Item(
             src=SOURCE,
             category="All",
@@ -89,5 +84,5 @@ def main(query: str):
 
 
 if __name__ == "__main__":
-    query = "HDD"
+    query = "батарея lenovo yoga"
     main(query)

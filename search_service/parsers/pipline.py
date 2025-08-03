@@ -5,6 +5,7 @@ from playwright.sync_api import TimeoutError
 
 from search_service.parsers.base import BaseParser
 from search_service.parsers.laptop.allnotebookparts import AllnotebookpartsParser
+from search_service.parsers.laptop.dfi import DFIParser
 from search_service.parsers.laptop.forlaptop import ForLaptopKievParser
 from search_service.parsers.laptop.fornb import ForNBParser
 from search_service.parsers.laptop.gsmforsage import GSMForsageParser
@@ -37,6 +38,7 @@ filters = {
     "AllNotebookParts": AllnotebookpartsParser,
     "LaptopParts": LaptoppartsParser,
     "RadioDetal": RadiodetalParser,
+    "DFI": DFIParser,
 }
 
 def delete_old_files():

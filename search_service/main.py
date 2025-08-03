@@ -21,9 +21,10 @@ def redirect(request: Request):
 
 @app.get("/search", response_class=HTMLResponse, name="search_get")
 def search_get(request: Request):
-    context = {"request": request, "query": "", "item_list": [], "filter_list": [filter for filter in filters.keys()]}
+    context = {"request": request, "filter_list": [filter for filter in filters.keys()]}
     return templates.TemplateResponse(
-        request=request, name="search_list.html", context=context
+        request=request, name="search_list.html", 
+        context=context
     )
 
 class SearchData(BaseModel):
@@ -33,12 +34,6 @@ class SearchData(BaseModel):
 
 @app.post("/search", response_class=HTMLResponse, name="search_post")
 def search_post(request: Request, data: SearchData = Body(...)):
-    context = {"request": request, "query": data.query, "items": [], "total_items": 0}
-    if not data.filters:
-        return JSONResponse(
-            status_code=400,
-            content=context,
-        )
     if data.query:
         print(f"Started query: {data.query}")
         parsers = []

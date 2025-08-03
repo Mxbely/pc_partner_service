@@ -28,7 +28,7 @@ def ascii(text: str) -> str:
 
 def run(playwright: Playwright, query: str, filename: str) -> None:
     delete_file(filename)
-    browser = playwright.chromium.launch(headless=False)
+    browser = playwright.chromium.launch(headless=True)
     context = browser.new_context()
     page = context.new_page()
     query = re.sub(r"\s+", "+", query)

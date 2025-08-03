@@ -132,6 +132,12 @@
                 searchBtn.textContent = "Пошук";
             });
     }
+
+    document.addEventListener("keyup", event => {
+        if (event.key === "Enter") {
+            StartSearch();
+        }
+    });
 </script>
 
 <style>
