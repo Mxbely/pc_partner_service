@@ -3,7 +3,6 @@ from datetime import datetime
 import time
 
 from playwright.sync_api import Playwright, expect, sync_playwright
-from playwright_stealth import stealth_sync
 
 from search_service.parsers.base import (
     BaseParser,
