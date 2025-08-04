@@ -15,6 +15,7 @@ from search_service.parsers.laptop.smartparts import SmartpartsParser
 from search_service.parsers.laptop.suncomp import SuncompParser
 from search_service.parsers.phone.all_spares import AllSparesParser
 from search_service.parsers.phone.artmobile import ArtmobileParser
+from search_service.parsers.phone.gsm_complect import GsmComplectParser
 from search_service.parsers.phone.motorolka import MotorolkaParser
 from search_service.parsers.phone.part_store import PartStoreParser
 from search_service.parsers.phone.stylecom import StylecomParser
@@ -40,7 +41,8 @@ filters = {
     "LaptopParts": LaptoppartsParser,
     "RadioDetal": RadiodetalParser,
     "DFI": DFIParser,
-    "PartStore": PartStoreParser
+    "PartStore": PartStoreParser,
+    "GSMComplect": GsmComplectParser,
 }
 
 def delete_old_files():
@@ -60,7 +62,7 @@ def check_file_exists(filename: str) -> bool:
 
 def make_filename(query: str, parsers: list[BaseParser]) -> str:
     query = query.replace(" ", "_")
-    pars_names = "_".join([parser.__class__.__name__ for parser in parsers])
+    pars_names = "_".join([parser.__class__.__name__[:4] for parser in parsers])
     return f"{query}_{pars_names}.csv"
 
 
