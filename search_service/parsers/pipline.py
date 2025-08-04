@@ -16,6 +16,7 @@ from search_service.parsers.laptop.suncomp import SuncompParser
 from search_service.parsers.phone.all_spares import AllSparesParser
 from search_service.parsers.phone.artmobile import ArtmobileParser
 from search_service.parsers.phone.motorolka import MotorolkaParser
+from search_service.parsers.phone.part_store import PartStoreParser
 from search_service.parsers.phone.stylecom import StylecomParser
 from search_service.parsers.phone.tplus import TplusParser
 from search_service.parsers.phone.vseplus import VseplusParser
@@ -39,6 +40,7 @@ filters = {
     "LaptopParts": LaptoppartsParser,
     "RadioDetal": RadiodetalParser,
     "DFI": DFIParser,
+    "PartStore": PartStoreParser
 }
 
 def delete_old_files():
