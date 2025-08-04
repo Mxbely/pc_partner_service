@@ -138,6 +138,12 @@
             StartSearch();
         }
     });
+
+    function ToggleAllFilters() {
+        const checkboxes = document.querySelectorAll('input[name="filters"]');
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        checkboxes.forEach(cb => cb.checked = !allChecked);
+    }
 </script>
 
 <style>

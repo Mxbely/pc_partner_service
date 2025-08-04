@@ -58,7 +58,7 @@ def check_file_exists(filename: str) -> bool:
 
 def make_filename(query: str, parsers: list[BaseParser]) -> str:
     query = query.replace(" ", "_")
-    pars_names = "_".join([parser.__class__.__name__ for parser in parsers])
+    pars_names = "_".join([parser.__class__.__name__[:4] for parser in parsers])
     return f"{query}_{pars_names}.csv"
 
 
@@ -86,12 +86,16 @@ def start_pipline(query: str, parsers: list[BaseParser]) -> str:
     if os.path.exists(finalname):
         os.remove(finalname)
 
+    with open(finalname, "w") as f:
+        pass
+
     with open(finalname, "a") as f:
         for parser in parsers:
             if os.path.exists(parser.filename):
                 with open(parser.filename, "r") as file:
                     lines = file.readlines()
                     f.writelines(lines[1:])
+                os.remove(parser.filename)
     end = datetime.now()
     print(f"Pipeline finished in {end - st}")
     return finalname

@@ -11,8 +11,8 @@ from search_service.parsers.pipline import start_pipline
 
 app = FastAPI()
 
-templates = Jinja2Templates(directory="/app/templates")
-
+# templates = Jinja2Templates(directory="/app/templates") # For Docker
+templates = Jinja2Templates(directory="templates") # Local 
 
 @app.get("/", response_class=HTMLResponse, name="index")
 def redirect(request: Request):
