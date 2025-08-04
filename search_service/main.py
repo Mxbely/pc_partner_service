@@ -11,7 +11,8 @@ from search_service.parsers.pipline import start_pipline
 
 app = FastAPI()
 
-templates = Jinja2Templates(directory="/app/templates")
+# templates = Jinja2Templates(directory="/app/templates")
+templates = Jinja2Templates(directory="templates")
 
 
 @app.get("/", response_class=HTMLResponse, name="index")
