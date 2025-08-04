@@ -31,7 +31,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     browser = playwright.chromium.launch(headless=True)
     context = browser.new_context()
     page = context.new_page()
-    separated_query = query.split("+")
+    separated_query = query.split()
 
     base_url = "https://gsm-komplekt.ua/ua"
     page.goto(base_url)
@@ -45,8 +45,10 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     page.wait_for_selector("div.product-container")
     button_counter = 1
     while True:
-        button = page.locator("div.ajax-btn-container div.ajax-more-btn")
-        if button.count() == 1 and button_counter <= 5:
+        button = page.locator("div.ajax-btn-container div.ajax-more-btn:not([style*='display: none'])")
+        if button.count() == 1 and button.is_visible():
+            if button_counter > 5:
+                break
             prev_count = page.locator("div.product-container").count()
             button.click()
             button_counter += 1
@@ -69,7 +71,12 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
         if not any(word.lower() in name.lower() for word in separated_query):
             continue
         item_url = item.locator("p.product-name-p a").get_attribute("href").strip()
-        price = float(item.locator("div.content_price div.prices-container-div-price span").first.text_content().strip())
+        price = item.locator("div.content_price div.prices-container-div-price span").first
+        if price.count() == 0:
+            continue
+        price = float(
+            price.text_content().strip().replace("грн", "").replace(" ", "").replace("\xa0", "")
+        )
         status = (
             item.locator("span.availability span")
             .last
@@ -103,5 +110,5 @@ def main(query: str):
 
 
 if __name__ == "__main__":
-    query = "123"
+    query = "батарея ipad"
     main(query)

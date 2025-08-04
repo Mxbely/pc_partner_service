@@ -11,6 +11,7 @@ from search_service.parsers.laptop.fornb import ForNBParser
 from search_service.parsers.laptop.gsmforsage import GSMForsageParser
 from search_service.parsers.laptop.laptopparts import LaptoppartsParser
 from search_service.parsers.laptop.radiodetal import RadiodetalParser
+from search_service.parsers.laptop.room_parts import RoomPartsParser
 from search_service.parsers.laptop.smartparts import SmartpartsParser
 from search_service.parsers.laptop.suncomp import SuncompParser
 from search_service.parsers.phone.all_spares import AllSparesParser
@@ -43,6 +44,7 @@ filters = {
     "DFI": DFIParser,
     "PartStore": PartStoreParser,
     "GSMComplect": GsmComplectParser,
+    "RoomParts": RoomPartsParser,
 }
 
 def delete_old_files():
