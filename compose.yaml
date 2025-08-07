@@ -1,0 +1,8 @@
+services:
+  search:
+    build:
+      context: .
+      dockerfile: search_service/Dockerfile
+    command: sh -c "xvfb-run -a poetry run uvicorn search_service.main:app --host 0.0.0.0 --port 8000"
+    ports:
+      - 9000:8000

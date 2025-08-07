@@ -1,0 +1,23 @@
+{% block sidebar %}
+<br>
+<br>
+<div class="p-2 border rounded bg-light">
+    <h5>Фільтри</h5>
+    <form id="filters-form">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="select-all" style="transform: scale(1.5);" onchange="ToggleAllFilters(this)">
+            <label class="form-check-label" for="select-all">
+                Обрати всі фільтри
+            </label>
+        </div>
+        {% for filter in filter_list %}
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="{{ filter }}" name="filters" value="{{ filter }}" style="transform: scale(1.5);">
+            <label class="form-check-label">
+                {{ filter }}
+            </label>
+        </div>
+        {% endfor %}
+    </form>
+</div>
+{% endblock sidebar %}

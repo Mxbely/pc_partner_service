@@ -67,6 +67,7 @@ instance/
 
 # Scrapy stuff:
 .scrapy
+**.csv
 
 # Sphinx documentation
 docs/_build/
@@ -140,6 +141,7 @@ celerybeat.pid
 .venv
 env/
 venv/
+.venv*
 ENV/
 env.bak/
 venv.bak/
