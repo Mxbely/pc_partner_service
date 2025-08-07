@@ -1,6 +1,5 @@
 import re
 from datetime import datetime
-import time
 
 from playwright.sync_api import Playwright, expect, sync_playwright
 
@@ -22,10 +21,6 @@ class PartStoreParser(BaseParser):
             run(playwright, self.query, self.filename)
 
 
-def ascii(text: str) -> str:
-    return re.sub(r"[^\x00-\x7F]+", "", text)
-
-
 def run(playwright: Playwright, query: str, filename: str) -> None:
     delete_file(filename)
     browser = playwright.chromium.launch(headless=True)
@@ -33,7 +28,6 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     page = context.new_page()
     query = re.sub(r"\s+", "+", query)
     separated_query = query.split("+")
-    
     base_url = "https://part-store.in.ua"
     url = f"{base_url}/ua/site_search?search_term={query}"
     page.goto(url)
@@ -41,23 +35,49 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     while True:
         items = page.locator(".cs-product-gallery__item-inner")
         count = page.locator(".cs-product-gallery__item-inner").count()
+
         if count == 0:
             break
+
         for i in range(count):
             item = items.nth(i)
-            status = item.locator("span.cs-goods-data__state").first.text_content().strip()
+            status = (
+                item.locator("span.cs-goods-data__state").first.text_content().strip()
+            )
+
             if status == "Немає в наявності":
                 continue
-            name = item.locator("a.cs-goods-title").text_content().strip().replace(",", "")
+
+            name = (
+                item.locator("a.cs-goods-title").text_content().strip().replace(",", "")
+            )
+
             if not any(word.lower() in name.lower() for word in separated_query):
                 continue
-            url = base_url + item.locator("a.cs-goods-title").get_attribute("href").strip()
-            price = item.locator("div.cs-goods-price span.cs-goods-price__value").first.text_content().strip()
+
+            url = (
+                base_url
+                + item.locator("a.cs-goods-title").get_attribute("href").strip()
+            )
+            price = (
+                item.locator("div.cs-goods-price span.cs-goods-price__value")
+                .first.text_content()
+                .strip()
+            )
+
             if price == "Ціну уточнюйте":
                 continue
-            price = price.replace("₴", "").replace("\xa0", "").replace(" ", "").replace(",", ".")
+
+            price = (
+                price.replace("₴", "")
+                .replace("\xa0", "")
+                .replace(" ", "")
+                .replace(",", ".")
+            )
+
             if not price:
                 continue
+
             item_data = Item(
                 src=SOURCE,
                 category="All",
@@ -68,10 +88,14 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
             )
             items_.append(item_data)
         next_button = page.locator("div.b-pager a.b-pager__link_pos_last")
+
         if next_button.count():
             url = base_url + next_button.get_attribute("href")
+
             if "page_6" in url:
                 break
+
+            # Use click() or goto(url)
             next_button.click()
             page.wait_for_selector(".cs-product-gallery__item")
             # page.goto(url)

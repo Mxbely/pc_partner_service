@@ -1,6 +1,5 @@
 import re
 from datetime import datetime
-import time
 
 from playwright.sync_api import Playwright, expect, sync_playwright
 
@@ -22,17 +21,12 @@ class GsmComplectParser(BaseParser):
             run(playwright, self.query, self.filename)
 
 
-def ascii(text: str) -> str:
-    return re.sub(r"[^\x00-\x7F]+", "", text)
-
-
 def run(playwright: Playwright, query: str, filename: str) -> None:
     delete_file(filename)
     browser = playwright.chromium.launch(headless=True)
     context = browser.new_context()
     page = context.new_page()
     separated_query = query.split()
-
     base_url = "https://gsm-komplekt.ua/ua"
     page.goto(base_url)
     page.get_by_role("textbox", name="Пошук").click()
@@ -40,15 +34,21 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     page.get_by_role("button", name="Пошук").click()
     page.wait_for_selector("div.content")
     empty_text = page.locator("div.content p.alert.alert-warning")
+
     if empty_text.count() == 1:
         return
+
     page.wait_for_selector("div.product-container")
     button_counter = 1
     while True:
-        button = page.locator("div.ajax-btn-container div.ajax-more-btn:not([style*='display: none'])")
+        button = page.locator(
+            "div.ajax-btn-container div.ajax-more-btn:not([style*='display: none'])"
+        )
+
         if button.count() == 1 and button.is_visible():
             if button_counter > 5:
                 break
+
             prev_count = page.locator("div.product-container").count()
             button.click()
             button_counter += 1
@@ -57,34 +57,43 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
                 arg=prev_count,
                 timeout=10000,
             )
-        else: 
+        else:
             break
-    selector = "div.product-container"
 
+    selector = "div.product-container"
     items_ = []
     items = page.locator(selector)
     count = page.locator(selector).count()
 
     for i in range(count):
         item = items.nth(i)
-        name = item.locator("p.product-name-p a").text_content().strip().replace(",", "")
+        name = (
+            item.locator("p.product-name-p a").text_content().strip().replace(",", "")
+        )
+
         if not any(word.lower() in name.lower() for word in separated_query):
             continue
+
         item_url = item.locator("p.product-name-p a").get_attribute("href").strip()
-        price = item.locator("div.content_price div.prices-container-div-price span").first
+        price = item.locator(
+            "div.content_price div.prices-container-div-price span"
+        ).first
+
         if price.count() == 0:
             continue
+
         price = float(
-            price.text_content().strip().replace("грн", "").replace(" ", "").replace("\xa0", "")
-        )
-        status = (
-            item.locator("span.availability span")
-            .last
-            .text_content()
+            price.text_content()
             .strip()
+            .replace("грн", "")
+            .replace(" ", "")
+            .replace("\xa0", "")
         )
+        status = item.locator("span.availability span").last.text_content().strip()
+
         if status != "Є в наявності":
             continue
+
         item_data = Item(
             src=SOURCE,
             category="All",
@@ -104,7 +113,6 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
 
 
 def main(query: str):
-
     with sync_playwright() as playwright:
         run(playwright, query, FILE_NAME)
 

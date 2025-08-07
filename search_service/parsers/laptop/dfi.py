@@ -1,6 +1,5 @@
 import re
 from datetime import datetime
-import time
 
 from playwright.sync_api import Playwright, expect, sync_playwright
 
@@ -22,23 +21,21 @@ class DFIParser(BaseParser):
             run(playwright, self.query, self.filename)
 
 
-def ascii(text: str) -> str:
-    return re.sub(r"[^\x00-\x7F]+", "", text)
-
-
 def run(playwright: Playwright, query: str, filename: str) -> None:
     delete_file(filename)
     browser = playwright.chromium.launch(headless=True)
     context = browser.new_context()
     page = context.new_page()
     query = re.sub(r"\s+", "+", query)
-    separated_query = query.split("+")
 
     base_url = "https://dfi.ua/ua"
     url = f"{base_url}/index.php?route=product/search&search={query}&limit=100"
     page.goto(url)
     selector = "div.product-thumb"
-    empty = page.locator("#mfilter-content-container >> text=Немає товарів, які відповідають критеріям пошуку.")
+    empty = page.locator(
+        "#mfilter-content-container >> text=Немає товарів, які відповідають критеріям пошуку."
+    )
+
     if empty.count() == 1:
         return
 
@@ -48,16 +45,26 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
 
     for i in range(count):
         item = items.nth(i)
-        name = item.locator("div.product-name a").text_content().strip().replace(",", "")
+        name = (
+            item.locator("div.product-name a").text_content().strip().replace(",", "")
+        )
         item_url = item.locator("div.product-name a").get_attribute("href").strip()
-        price = float(item.locator("p.price").text_content().strip().replace("грн", "").replace(" ", ""))
+        price = float(
+            item.locator("p.price")
+            .text_content()
+            .strip()
+            .replace("грн", "")
+            .replace(" ", "")
+        )
         status = (
             item.locator("div.actions div.cart button.btn.btn-general span")
             .text_content()
             .strip()
         )
+
         if status == "Немає в наявності":
             continue
+
         status = "В наявності"
         item_data = Item(
             src=SOURCE,
@@ -78,7 +85,6 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
 
 
 def main(query: str):
-
     with sync_playwright() as playwright:
         run(playwright, query, FILE_NAME)
 

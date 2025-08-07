@@ -21,10 +21,6 @@ class WelcomMobiParser(BaseParser):
             run(playwright, self.query, self.filename)
 
 
-def ascii(text: str) -> str:
-    return re.sub(r"[^\x00-\x7F]+", "", text)
-
-
 def run(playwright: Playwright, query: str, filename: str) -> None:
     delete_file(filename)
     browser = playwright.chromium.launch(headless=True)
@@ -39,16 +35,14 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
             "path": "/",
             "expires": dtime,
             "httpOnly": False,
-            "secure": False
+            "secure": False,
         },
     ]
-    
     page = context.new_page()
     query = re.sub(r"\s+", "+", query)
     separated_query = query.split("+")
     base_url = "https://welcome-mobi.com.ua"
     url = f"{base_url}/shop/search?text={query}"
-
     page.goto("https://welcome-mobi.com.ua/")
     page.locator("#inputString").click()
     page.locator("#inputString").fill("дисплей iphone X")
@@ -61,17 +55,20 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     for i in range(count):
         item = items.nth(i)
         name = item.locator(".title").text_content().strip().replace(",", "")
+
         if not any(word.lower() in name.lower() for word in separated_query):
             continue
+
         url = item.locator("a").get_attribute("href").strip()
         status1 = item.locator("div.btn.btn-def button")
+
         if status1.count():
             continue
+
         status = "В наявності"
         price1 = item.locator("div.d_i-b span").first.text_content().strip()
         price2 = item.locator("div.d_i-b sup").first.text_content().strip()
         price = float(f"{price1}.{price2}")
-
         item_data = Item(
             src=SOURCE,
             category="All",

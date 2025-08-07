@@ -21,10 +21,6 @@ class SuncompParser(BaseParser):
             run(playwright, self.query, self.filename)
 
 
-def ascii(text: str) -> str:
-    return re.sub(r"[^\x00-\x7F]+", "", text)
-
-
 def run(playwright: Playwright, query: str, filename: str) -> None:
     delete_file(filename)
     browser = playwright.chromium.launch(headless=True)
@@ -41,15 +37,20 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     for i in range(count):
         item = items.nth(i)
         name = item.locator(".pr-name").text_content().strip().replace(",", "")
+
         if not any(word.lower() in name.lower() for word in separated_query):
             continue
+
         url = item.locator(".pr-name").get_attribute("href").strip()
         price = item.locator(".pr-prices .act span")
+
         if not price.count():
             price = "Ціна не вказана"
             continue
+
         price = float(price.text_content().replace(" ", "").strip())
         status = item.locator(".pr-prices span")
+
         if status.count():
             status = status.last.text_content().strip()
             if status != "в наличии":

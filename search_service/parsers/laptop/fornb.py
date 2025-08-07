@@ -38,21 +38,27 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     items = page.locator("ul.product_list li.ajax_block_product")
     count = page.locator("ul.product_list li.ajax_block_product").count()
     items_ = []
+
     for i in range(count):
         item = items.nth(i)
         name_element = item.locator(".right-block h5").locator("a").nth(0)
         name = name_element.text_content().strip().replace(",", "")
         name = name.replace(",", "")
+
         if not any(word.lower() in name.lower() for word in separated_query):
             continue
+
         price = item.locator(".content_price span")
         if price.count():
-            price = float(ascii(price.text_content().strip().replace(",", ".").replace(" ", "")))
+            price = float(
+                ascii(price.text_content().strip().replace(",", ".").replace(" ", ""))
+            )
         else:
-            price = "Ціна не вказана"
             continue
+
         url = name_element.get_attribute("href")
         status = item.locator(".availability")
+
         if status.count():
             status = status.text_content().strip()
             if status == "Нет в наличии":
@@ -79,7 +85,6 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
 
 
 def main(query: str):
-
     with sync_playwright() as playwright:
         run(playwright, query, FILE_NAME)
 

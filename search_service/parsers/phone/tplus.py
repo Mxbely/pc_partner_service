@@ -1,6 +1,5 @@
 import re
 from datetime import datetime
-import time
 
 from playwright.sync_api import Playwright, expect, sync_playwright
 
@@ -25,7 +24,7 @@ class TplusParser(BaseParser):
 def run(playwright: Playwright, query: str, filename: str) -> None:
     delete_file(filename)
     browser = playwright.chromium.launch(headless=True)
-    context = browser.new_context(**base_context)   
+    context = browser.new_context(**base_context)
     page = context.new_page()
     query = re.sub(r"\s+", "+", query)
     separated_query = query.split("+")
@@ -33,8 +32,10 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     url = f"{base_url}/search?search={query}&limit=50"
     page.goto(url)
     page.get_by_role("button", name="Погоджуюсь").click()
+    button = page.locator(
+        "button.v-btn.v-btn--has-bg.theme--light.v-size--default.primary"
+    )
 
-    button = page.locator("button.v-btn.v-btn--has-bg.theme--light.v-size--default.primary")
     if button.count():
         return
 
@@ -42,6 +43,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     items = page.locator(".product-item")
     count = page.locator(".product-item").count()
     items_ = []
+
     for i in range(count):
         item = items.nth(i)
         name = (
@@ -50,8 +52,10 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
             .strip()
             .replace(",", "")
         )
+
         if not any(word.lower() in name.lower() for word in separated_query):
             continue
+
         url = (
             base_url
             + item.locator("a.product-item--name").get_attribute("href").strip()
@@ -73,11 +77,15 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
         status_offer = item.locator(
             ".v-icon.notranslate.mdi.mdi-human-dolly.theme--dark"
         )
+
         if status_nth.count() or status_none.count():
             continue
+
         status = "В наявності"
+
         if status_offer.count():
             status = "Можна замовити"
+
         item_data = Item(
             src=SOURCE,
             category="All",
@@ -97,12 +105,10 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
 
 
 def main(query: str):
-
     with sync_playwright() as playwright:
         run(playwright, query, FILE_NAME)
 
 
 if __name__ == "__main__":
-    # query = "батарея acer AS"
     query = "SSD 25 gb"
     main(query)

@@ -1,6 +1,7 @@
 import os
 from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime
+
 from playwright.sync_api import TimeoutError
 
 from search_service.parsers.base import BaseParser
@@ -25,7 +26,6 @@ from search_service.parsers.phone.tplus import TplusParser
 from search_service.parsers.phone.vseplus import VseplusParser
 from search_service.parsers.phone.welcom_mobi import WelcomMobiParser
 
-
 filters = {
     "ForLaptop": ForLaptopKievParser,
     "Motorolka": MotorolkaParser,  # CPU intensive
@@ -48,6 +48,7 @@ filters = {
     "RoomParts": RoomPartsParser,
     "MobileParts": MobilePartsParser,
 }
+
 
 def delete_old_files():
     current_time = datetime.now()
@@ -80,12 +81,14 @@ def run_parser(parser):
 def start_pipline(query: str, parsers: list[BaseParser]) -> str:
     st = datetime.now()
     finalname = make_filename(query, parsers)
+
     if check_file_exists(finalname):
         print(f"File {finalname} already exists. Returning existing file.")
         return finalname
 
     max_workers = int(os.cpu_count() * 0.75) or 1
     print(f"Using {max_workers} workers for parsing")
+
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         futures = [executor.submit(run_parser, parser) for parser in parsers]
         for future in futures:
@@ -104,6 +107,7 @@ def start_pipline(query: str, parsers: list[BaseParser]) -> str:
                     lines = file.readlines()
                     f.writelines(lines[1:])
                 os.remove(parser.filename)
+
     end = datetime.now()
     print(f"Pipeline finished in {end - st}")
     return finalname

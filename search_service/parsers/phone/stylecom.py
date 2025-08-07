@@ -21,10 +21,6 @@ class StylecomParser(BaseParser):
             run(playwright, self.query, self.filename)
 
 
-def ascii(text: str) -> str:
-    return re.sub(r"[^\x00-\x7F]+", "", text)
-
-
 def run(playwright: Playwright, query: str, filename: str) -> None:
     delete_file(filename)
     browser = playwright.chromium.launch(headless=True)
@@ -38,23 +34,28 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     items = page.locator(".product-tile--search-autocompleate")
     count = page.locator(".product-tile--search-autocompleate").count()
     items_ = []
+
     for i in range(count):
         item = items.nth(i)
         name = item.locator("a").first.get_attribute("title").strip().replace(",", "")
+
         if not any(word.lower() in name.lower() for word in separated_query):
             continue
+
         price = item.locator("div.product-tile__price span").first.text_content()
         price = price.replace("грн", "").replace(" ", "").strip()
+
         if not price:
             continue
+
         price = float(price)
-        
         url = item.locator("a").first.get_attribute("href").strip()
         status = (
             item.locator(".product-tile__info .product-tile__stock")
             .text_content()
             .strip()
         )
+
         if status == "Скоро з'явиться":
             continue
 
@@ -77,7 +78,6 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
 
 
 def main(query: str):
-
     with sync_playwright() as playwright:
         run(playwright, query, FILE_NAME)
 

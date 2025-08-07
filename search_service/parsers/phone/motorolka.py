@@ -24,17 +24,24 @@ def run(query, filename: str) -> None:
     url = "https://motorolka.org.ua/multisearch/searchProducts.php"
     params = {"search": query}
     headers = {"User-Agent": "Mozilla/5.0", "X-Requested-With": "XMLHttpRequest"}
-
-    response = requests.get(url, params=params, headers=headers)
+    try:
+        response = requests.get(url, params=params, headers=headers)
+    except requests.exceptions.RequestException as e:
+        print(e)
+        return
     data = response.json()
     item_groups = data.get("results", {}).get("item_groups", {})
     items_ = []
+
     for group in item_groups.values():
         category_name = group["category"]["name"].replace(",", "/")
+
         for item in group["items"].values():
             price = item["price"]
+
             if not price:
                 continue
+
             item = Item(
                 src=SOURCE,
                 category=category_name,
@@ -50,7 +57,6 @@ def run(query, filename: str) -> None:
 
 
 def main(query: str):
-
     run(query, FILE_NAME)
 
 

@@ -43,6 +43,7 @@ def run(query, filename: str) -> None:
     for item in items:
         if not any(stock for stock in item["stocks"] if stock["qty"] == "В наявності"):
             continue
+
         item = Item(
             src=SOURCE,
             category="All",

@@ -1,6 +1,5 @@
 import re
 from datetime import datetime
-import time
 
 from playwright.sync_api import Playwright, expect, sync_playwright
 
@@ -22,10 +21,6 @@ class ArtmobileParser(BaseParser):
             run(playwright, self.query, self.filename)
 
 
-def ascii(text: str) -> str:
-    return re.sub(r"[^\x00-\x7F]+", "", text)
-
-
 def run(playwright: Playwright, query: str, filename: str) -> None:
     delete_file(filename)
     browser = playwright.chromium.launch(headless=True)
@@ -33,12 +28,12 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     page = context.new_page()
     query = re.sub(r"\s+", "+", query)
     separated_query = query.split("+")
-
     base_url = "https://artmobile.ua"
     url = f"{base_url}/search?term={query}&perPage=96&sort=price.desc"
     page.goto(url)
     selector = "div.product-card"
     empty = page.locator("div.empty-text")
+
     if empty.count():
         return
 
@@ -48,18 +43,23 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
 
     for i in range(count):
         item = items.nth(i)
-        name = item.locator("div.product-title a").text_content().strip().replace(",", "")
+        name = (
+            item.locator("div.product-title a").text_content().strip().replace(",", "")
+        )
+
         if not any(word.lower() in name.lower() for word in separated_query):
             continue
+
         item_url = item.locator("div.product-title a").get_attribute("href").strip()
         price = float(
-            item.locator("div.price").text_content().strip().replace("грн", "").replace("\xa0", "")
-        )
-        status = (
-            item.locator("div.page-stock")
+            item.locator("div.price")
             .text_content()
             .strip()
+            .replace("грн", "")
+            .replace("\xa0", "")
         )
+        status = item.locator("div.page-stock").text_content().strip()
+
         if status != "В наявності":
             continue
 
@@ -82,7 +82,6 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
 
 
 def main(query: str):
-
     with sync_playwright() as playwright:
         run(playwright, query, FILE_NAME)
 

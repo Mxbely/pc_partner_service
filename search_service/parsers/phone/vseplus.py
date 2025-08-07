@@ -21,10 +21,6 @@ class VseplusParser(BaseParser):
             run(playwright, self.query, self.filename)
 
 
-def ascii(text: str) -> str:
-    return re.sub(r"[^\x00-\x7F]+", "", text)
-
-
 def run(playwright: Playwright, query: str, filename: str) -> None:
     delete_file(filename)
     browser = playwright.chromium.launch(headless=True)
@@ -32,37 +28,50 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     page = context.new_page()
     query = re.sub(r"\s+", "+", query)
     separated_query = query.split("+")
-
     page_number = 1
     base_url = "https://vseplus.com"
     url = f"{base_url}/search/p-{page_number}?s=-price&q={query}"
     page.goto(url)
     selector = "div.card-product.list-cards-product__item div.card-product__content"
     empty = page.locator("div.empty")
+
     if empty.count():
         return
+
     paginator_text = page.locator("div.paginator__summary").text_content().strip()
     pages = int(paginator_text.split(" ")[-1])
-
     items_ = []
+
     while True:
         items = page.locator(selector)
         count = page.locator(selector).count()
 
         for i in range(count):
             item = items.nth(i)
-            name = item.locator("div.card-product__info a.card-product__link").text_content().strip().replace(",", "")
-            if not any(word.lower() in name.lower() for word in separated_query):
-                continue
-            item_url = base_url + item.locator("div.card-product__info a.card-product__link").get_attribute("href").strip()
-            price = float(
-                item.locator("p.product-price__current strong").text_content().replace("\xa0", "").strip()
-            )
-            status = (
-                item.locator("p.product-availability")
+            name = (
+                item.locator("div.card-product__info a.card-product__link")
                 .text_content()
                 .strip()
+                .replace(",", "")
             )
+
+            if not any(word.lower() in name.lower() for word in separated_query):
+                continue
+
+            item_url = (
+                base_url
+                + item.locator("div.card-product__info a.card-product__link")
+                .get_attribute("href")
+                .strip()
+            )
+            price = float(
+                item.locator("p.product-price__current strong")
+                .text_content()
+                .replace("\xa0", "")
+                .strip()
+            )
+            status = item.locator("p.product-availability").text_content().strip()
+
             if status != "В наличии":
                 continue
 
@@ -76,8 +85,10 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
             )
             items_.append(item_data)
         page_number += 1
+
         if page_number > 5 or page_number > pages:
             break
+
         url = f"{base_url}/search/p-{page_number}?s=-price&q={query}"
         page.goto(url)
     items_ = sorted(items_, key=lambda x: x.price, reverse=True)
@@ -90,7 +101,6 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
 
 
 def main(query: str):
-
     with sync_playwright() as playwright:
         run(playwright, query, FILE_NAME)
 

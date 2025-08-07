@@ -1,18 +1,19 @@
 import os
-from search_service.parsers.pipline import filters
+from dataclasses import asdict
 
 from fastapi import Body, FastAPI, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
-from dataclasses import asdict
+
 from search_service.parsers.base import Item
-from search_service.parsers.pipline import start_pipline
+from search_service.parsers.pipline import filters, start_pipline
 
 app = FastAPI()
 
 # templates = Jinja2Templates(directory="/app/templates") # For Docker
-templates = Jinja2Templates(directory="templates") # Local 
+templates = Jinja2Templates(directory="templates")  # Local
+
 
 @app.get("/", response_class=HTMLResponse, name="index")
 def redirect(request: Request):
@@ -23,24 +24,27 @@ def redirect(request: Request):
 def search_get(request: Request):
     context = {"request": request, "filter_list": [filter for filter in filters.keys()]}
     return templates.TemplateResponse(
-        request=request, name="search_list.html", 
-        context=context
+        request=request, name="search_list.html", context=context
     )
+
 
 class SearchData(BaseModel):
     query: str
     filters: list[str] = []
-    
+
 
 @app.post("/search", response_class=HTMLResponse, name="search_post")
 def search_post(request: Request, data: SearchData = Body(...)):
     if data.query:
         print(f"Started query: {data.query}")
         parsers = []
+
         for filter_name in data.filters:
             if filter_name in filters:
                 parsers.append(filters[filter_name](data.query))
+
         filename = start_pipline(data.query, parsers)
+
         with open(filename, "r") as f:
             items = []
             for line in f.readlines():
@@ -67,5 +71,5 @@ def search_post(request: Request, data: SearchData = Body(...)):
             "query": data.query,
             "items": [asdict(item) for item in context["items"]],
             "total_items": len(context["items"]),
-        }
+        },
     )

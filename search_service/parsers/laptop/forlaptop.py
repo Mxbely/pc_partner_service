@@ -1,5 +1,5 @@
-from datetime import datetime
 import re
+from datetime import datetime
 
 from playwright.sync_api import Playwright, expect, sync_playwright
 
@@ -31,9 +31,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     base_url = "https://4laptop.kiev.ua"
     url = f"{base_url}/index.php?route=product/search&search={query}&limit=500"
     page.goto(url)
-
     selector = ".category-page .product-layout"
-
     items = page.locator(selector)
 
     if items.count() == 0:
@@ -43,13 +41,23 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
     for i in range(items.count()):
         name = items.nth(i).locator(".product-name a").inner_text()
         name = name.replace(",", "")
+
         if not any(word.lower() in name.lower() for word in separated_query):
             continue
+
         link = items.nth(i).locator(".product-name a").get_attribute("href")
-        price = float(items.nth(i).locator(".price .price_no_format").inner_text().replace("грн.", "").replace(" ", ""))
+        price = float(
+            items.nth(i)
+            .locator(".price .price_no_format")
+            .inner_text()
+            .replace("грн.", "")
+            .replace(" ", "")
+        )
         status = items.nth(i).locator(".stock-status").inner_text()
+
         if status == "Нет в наличии":
             continue
+
         items_.append(
             Item(
                 src=SOURCE,
@@ -69,12 +77,10 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
 
 
 def main(query: str):
-
     with sync_playwright() as playwright:
         run(playwright, query)
 
 
 if __name__ == "__main__":
     query = "блок живлення"
-    # query = "матриця 15.6"
     main(query)

@@ -51,14 +51,17 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
             continue
 
         price = item.locator(".product-price .-current")
+
         if price.count():
             price = ascii(price.text_content().strip())
         else:
             price = "Ціна не вказана"
+
         url = base_url + item.locator(
             ".component_product_list_info_right h3 a"
         ).get_attribute("href")
         status = item.locator(".relative")
+
         if status.count():
             status = "Немає в наявності"
             continue
@@ -84,12 +87,10 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
 
 
 def main(query: str):
-
     with sync_playwright() as playwright:
         run(playwright, query, FILE_NAME)
 
 
 if __name__ == "__main__":
     query = "блок живлення"
-    # query = "матриця 15.6"
     main(query)
