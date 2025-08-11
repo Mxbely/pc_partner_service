@@ -18,6 +18,7 @@ from search_service.parsers.laptop.suncomp import SuncompParser
 from search_service.parsers.phone.all_spares import AllSparesParser
 from search_service.parsers.phone.artmobile import ArtmobileParser
 from search_service.parsers.phone.gsm_complect import GsmComplectParser
+from search_service.parsers.phone.icd import IcdParser
 from search_service.parsers.phone.mobile_parts import MobilePartsParser
 from search_service.parsers.phone.motorolka import MotorolkaParser
 from search_service.parsers.phone.part_store import PartStoreParser
@@ -47,6 +48,7 @@ filters = {
     "GSMComplect": GsmComplectParser,
     "RoomParts": RoomPartsParser,
     "MobileParts": MobilePartsParser,
+    "ICD": IcdParser,
 }
 
 
