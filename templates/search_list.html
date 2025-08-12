@@ -15,8 +15,11 @@
 
     <!-- Поле пошуку і кнопка -->
     <div class="buttons-block default-margin-top">
-        <input type="text" name="query" placeholder="Пошук" class="form-control d-inline-block w-auto me-2" />
+        <label for="query" class="form-label">Пошук:</label>
+        <input type="text" name="query" placeholder="Введіть модель" class="form-control d-inline-block w-auto me-2" />
         <button type="button" onclick="StartSearch()" class="btn btn-primary">Пошук</button>
+        <label for="filters" class="form-label" style="margin-left: 80px;">Додаткові фільтри по словам:</label>
+        <input type="text" name="subquery" placeholder="Батарея акумулятор" class="form-control d-inline-block w-auto ms-2" />
 
         <!-- Статистика пошуку -->
         <div class="mt-2">
@@ -63,11 +66,16 @@
 
 <script>
     function StartSearch() {
-        const query = document.querySelector('input[name="query"]').value;
+        const query = document.querySelector('input[name="query"]').value.trim();
         if (!query) {
             alert("Будь ласка, введіть запит для пошуку.");
             return;
         }
+        if (query.length < 3) {
+            alert("Запит повинен містити не менше 3 символів.");
+            return;
+        }
+        const subquery = document.querySelector('input[name="subquery"]').value.trim();
         const checkedFilters = Array.from(document.querySelectorAll(`input[name^="filters-"]:checked`))
             .map(cb => cb.value);
         if (checkedFilters.length === 0) {
@@ -75,7 +83,7 @@
             return;
         }
         const url = "{{ url_for('search_post') }}";
-        const data = { "query": query, "filters": checkedFilters };
+        const data = { "query": query, "subquery": subquery, "filters": checkedFilters };
 
         // Показати індикатор і заблокувати кнопку
         document.getElementById("search-loading").classList.remove("d-none");

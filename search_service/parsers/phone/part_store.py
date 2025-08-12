@@ -42,9 +42,12 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
 
         for i in range(count):
             item = items.nth(i)
-            status = (
-                item.locator("span.cs-goods-data__state").first.text_content().strip()
-            )
+            status = item.locator("span.cs-goods-data__state")
+
+            if status.count() == 0:
+                continue
+
+            status = status.first.text_content().strip()
 
             if status == "Немає в наявності":
                 continue
@@ -90,7 +93,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
             items_.append(item_data)
         next_button = page.locator("div.b-pager a.b-pager__link_pos_last")
 
-        if next_button.count():
+        if next_button.is_visible():
             url = base_url + next_button.get_attribute("href")
 
             if "page_6" in url:
@@ -98,8 +101,8 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
 
             # Use click() or goto(url)
             next_button.click()
-            page.wait_for_selector(".cs-product-gallery__item")
             # page.goto(url)
+            page.wait_for_selector(".cs-product-gallery__item")
         else:
             break
     items_ = sorted(items_, key=lambda x: x.price, reverse=True)
