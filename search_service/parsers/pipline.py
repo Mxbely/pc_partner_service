@@ -27,26 +27,30 @@ from search_service.parsers.phone.tplus import TplusParser
 from search_service.parsers.phone.vseplus import VseplusParser
 from search_service.parsers.phone.welcom_mobi import WelcomMobiParser
 
-filters = {
+laptops = {
     "ForLaptop": ForLaptopKievParser,
-    "Motorolka": MotorolkaParser,  # CPU intensive
-    "AllSpares": AllSparesParser,
     "ForNB": ForNBParser,
-    "Stylecom": StylecomParser,
     "SunComp": SuncompParser,
-    "TPlus": TplusParser,
     "GSMForsage": GSMForsageParser,
-    "WelcomMobi": WelcomMobiParser,
     "SmartParts": SmartpartsParser,  # CPU intensive
-    "Vseplus": VseplusParser,
-    "Artmobile": ArtmobileParser,
     "AllNotebookParts": AllnotebookpartsParser,
     "LaptopParts": LaptoppartsParser,
     "RadioDetal": RadiodetalParser,
     "DFI": DFIParser,
-    "PartStore": PartStoreParser,
-    "GSMComplect": GsmComplectParser,
     "RoomParts": RoomPartsParser,
+}
+
+phones = {
+    "Motorolka": MotorolkaParser,  # CPU intensive
+    "AllSpares": AllSparesParser,
+    "Stylecom": StylecomParser,
+    "TPlus": TplusParser,
+    "GSMForsage": GSMForsageParser,
+    "WelcomMobi": WelcomMobiParser,
+    "Vseplus": VseplusParser,
+    "Artmobile": ArtmobileParser,
+    "Part-Store": PartStoreParser,
+    "GSMComplect": GsmComplectParser,
     "MobileParts": MobilePartsParser,
     "ICD": IcdParser,
 }

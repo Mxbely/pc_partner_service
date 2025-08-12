@@ -1,23 +1,47 @@
 {% block sidebar %}
 <br>
 <br>
+
 <div class="p-2 border rounded bg-light">
-    <h5>Фільтри</h5>
-    <form id="filters-form">
+    <h5>Фільтри для ноутбуків</h5>
+    <form id="filters-laptops">
         <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="select-all" style="transform: scale(1.5);" onchange="ToggleAllFilters(this)">
-            <label class="form-check-label" for="select-all">
-                Обрати всі фільтри
+            <input class="form-check-input" type="checkbox" id="select-all-laptops" style="transform: scale(1.5);"
+                onchange="toggleAllFilters('laptops', this)">
+            <label class="form-check-label" for="select-all-laptops">
+                Обрати всі (ноутбуки)
             </label>
         </div>
-        {% for filter in filter_list %}
+        {% for filter in filter_laptops %}
         <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="{{ filter }}" name="filters" value="{{ filter }}" style="transform: scale(1.5);">
-            <label class="form-check-label">
-                {{ filter }}
-            </label>
+            <input class="form-check-input" type="checkbox" name="filters-laptops" value="{{ filter }}"
+                style="transform: scale(1.5);">
+            <label class="form-check-label">{{ filter }}</label>
         </div>
         {% endfor %}
     </form>
 </div>
+
+<br>
+
+<div class="p-2 border rounded bg-light">
+    <h5>Фільтри для телефонів</h5>
+    <form id="filters-phones">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="select-all-phones" style="transform: scale(1.5);"
+                onchange="toggleAllFilters('phones', this)">
+            <label class="form-check-label" for="select-all-phones">
+                Обрати всі (телефони)
+            </label>
+        </div>
+        {% for filter in filter_phones %}
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="filters-phones" value="{{ filter }}"
+                style="transform: scale(1.5);">
+            <label class="form-check-label">{{ filter }}</label>
+        </div>
+        {% endfor %}
+    </form>
+</div>
+
 {% endblock sidebar %}
