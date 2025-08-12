@@ -34,6 +34,7 @@ def search_get(request: Request):
 
 class SearchData(BaseModel):
     query: str
+    subquery: str
     filters: list[str] = []
 
 
@@ -43,6 +44,8 @@ def search_post(
     data: SearchData = Body(...),
     background_tasks: BackgroundTasks = BackgroundTasks(),
 ):
+    subqueries = data.subquery.split(" ")
+
     if data.query:
         print(f"Started query: {data.query}")
         parsers = []
@@ -61,10 +64,16 @@ def search_post(
             items = []
             for line in f.readlines():
                 lines = line.strip().split(",")
+                name = lines[2]
+
+                if subqueries:
+                    if not any(word.lower() in name.lower() for word in subqueries):
+                        continue
+
                 item = Item(
                     src=lines[0],
                     category=lines[1],
-                    name=lines[2],
+                    name=name,
                     price=float(lines[3]),
                     url=",".join(lines[4:-1]),
                     status=lines[-1],

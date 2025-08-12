@@ -44,6 +44,12 @@ def run(query, filename: str) -> None:
     for item in items:
         if not any(stock for stock in item["stocks"] if stock["qty"] == "В наявності"):
             continue
+
+        name = item["name"].replace(",", "")
+
+        if not any(word.lower() in name.lower() for word in query.split("+")):
+            continue
+
         try:
             price = item["price"].replace(",", ".").replace(" грн.", "")
             price = float(price)
@@ -53,7 +59,7 @@ def run(query, filename: str) -> None:
         item = Item(
             src=SOURCE,
             category="All",
-            name=item["name"].replace(",", ""),
+            name=name,
             price=price,
             url=item["url"],
             status="В наявності",

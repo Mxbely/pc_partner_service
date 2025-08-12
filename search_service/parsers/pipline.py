@@ -92,9 +92,9 @@ def start_pipline(query: str, parsers: list[BaseParser]) -> str:
 
     max_workers = int(os.cpu_count() * 0.75) or 1
     print(f"Using {max_workers} workers for parsing")
-
+    not_parsed = [parser for parser in parsers if not os.path.exists(parser.filename)]
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        futures = [executor.submit(run_parser, parser) for parser in parsers]
+        futures = [executor.submit(run_parser, parser) for parser in not_parsed]
         for future in futures:
             future.result()
 
