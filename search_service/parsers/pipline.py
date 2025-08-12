@@ -52,7 +52,7 @@ phones = {
     "Vseplus": VseplusParser,
     "Artmobile": ArtmobileParser,
     "Part-Store": PartStoreParser,
-    "PartStore": PartStore1Parser,  # CPU intensive
+    # "PartStore": PartStore1Parser,  # CPU intensive
     "GSMComplect": GsmComplectParser,
     "MobileParts": MobilePartsParser,
     "ICD": IcdParser,
@@ -66,7 +66,7 @@ def delete_old_files():
             filepath = os.path.join(DEFAULT_DIR, filename)
             file_time = os.path.getmtime(filepath)
             file_datetime = datetime.fromtimestamp(file_time)
-            if (current_time - file_datetime).seconds > 60 * 2:  # 16 hours
+            if (current_time - file_datetime).seconds > 60 * 60 * 16:  # 16 hours
                 os.remove(filepath)
 
 
@@ -98,10 +98,10 @@ def start_pipline(query: str, parsers: list[BaseParser]) -> str:
         for future in futures:
             future.result()
 
-    with open(filepath, "a") as f:
+    with open(filepath, "a", encoding="utf-8") as f:
         for parser in parsers:
             if os.path.exists(parser.filename):
-                with open(parser.filename, "r") as file:
+                with open(parser.filename, "r", encoding="utf-8") as file:
                     lines = file.readlines()
                     f.writelines(lines[1:])
 

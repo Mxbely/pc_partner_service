@@ -18,8 +18,8 @@ FILE_NAME = f"partstore_{datetime.today().strftime('%Y-%m-%d_%H-%M')}.csv"
 LOGIN = os.getenv("PARTSTORE_LOGIN")
 PASSWORD = os.getenv("PARTSTORE_PASS")
 
-if not LOGIN or not PASSWORD:
-    raise Exception("PARTSTORE_LOGIN or PARTSTORE_PASS is not set")
+# if not LOGIN or not PASSWORD:
+#     raise Exception("PARTSTORE_LOGIN or PARTSTORE_PASS is not set")
 
 
 class PartStore1Parser(BaseParser):

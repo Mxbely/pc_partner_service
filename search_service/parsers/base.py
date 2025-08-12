@@ -36,7 +36,7 @@ class BaseParser:
         self.query = query
         self.filename = os.path.join(
             DEFAULT_DIR,
-            f"{self.query.replace(" ", "_")}_{type(self).__name__}{datetime.today().strftime('%Y-%m-%d')}.csv",
+            f"{self.query.replace(" ", "_")}_{type(self).__name__}_{datetime.today().strftime('%Y-%m-%d')}.csv",
         )
 
     def parse(self):
@@ -51,9 +51,9 @@ def check_parser_file(filename: str) -> str:
 def write_to_csv(items: list[Item], filename: str):
     if os.path.exists(filename):
         os.remove(filename)
-    with open(filename, "a") as f:
+    with open(filename, "a", encoding="utf-8") as f:
         f.write("src,category,name,price,url,status\n")
-    with open(filename, "a") as f:
+    with open(filename, "a", encoding="utf-8") as f:
         for item in items:
             f.write(
                 f"{item.src},{item.category},{item.name},{item.price},{item.url} ,{item.status}\n"

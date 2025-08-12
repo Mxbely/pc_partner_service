@@ -57,7 +57,7 @@ def search_post(
 
         filepath = start_pipline(data.query, parsers)
 
-        with open(filepath, "r") as f:
+        with open(filepath, "r", encoding="utf-8") as f:
             items = []
             for line in f.readlines():
                 lines = line.strip().split(",")
