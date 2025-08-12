@@ -23,6 +23,7 @@ from search_service.parsers.phone.icd import IcdParser
 from search_service.parsers.phone.mobile_parts import MobilePartsParser
 from search_service.parsers.phone.motorolka import MotorolkaParser
 from search_service.parsers.phone.part_store import PartStoreParser
+from search_service.parsers.phone.partstore import PartStore1Parser
 from search_service.parsers.phone.stylecom import StylecomParser
 from search_service.parsers.phone.tplus import TplusParser
 from search_service.parsers.phone.vseplus import VseplusParser
@@ -51,6 +52,7 @@ phones = {
     "Vseplus": VseplusParser,
     "Artmobile": ArtmobileParser,
     "Part-Store": PartStoreParser,
+    "PartStore": PartStore1Parser,  # CPU intensive
     "GSMComplect": GsmComplectParser,
     "MobileParts": MobilePartsParser,
     "ICD": IcdParser,
@@ -59,17 +61,13 @@ phones = {
 
 def delete_old_files():
     current_time = datetime.now()
-    for filename in os.listdir("."):
+    for filename in os.listdir(os.path.join(DEFAULT_DIR)):
         if filename.endswith(".csv"):
-            file_time = os.path.getmtime(filename)
+            filepath = os.path.join(DEFAULT_DIR, filename)
+            file_time = os.path.getmtime(filepath)
             file_datetime = datetime.fromtimestamp(file_time)
-            if (current_time - file_datetime).seconds > 60 * 60 * 16:  # 16 hours
-                os.remove(filename)
-
-
-def check_file_exists(filename: str) -> bool:
-    delete_old_files()
-    return os.path.exists(filename)
+            if (current_time - file_datetime).seconds > 60 * 2:  # 16 hours
+                os.remove(filepath)
 
 
 def make_filename(query: str, parsers: list[BaseParser]) -> str:
@@ -90,6 +88,7 @@ def start_pipline(query: str, parsers: list[BaseParser]) -> str:
     finalname = make_filename(query, parsers)
     filepath = os.path.join(DEFAULT_DIR, finalname)
     os.makedirs(DEFAULT_DIR, exist_ok=True)
+    delete_old_files()
 
     max_workers = int(os.cpu_count() * 0.75) or 1
     print(f"Using {max_workers} workers for parsing")

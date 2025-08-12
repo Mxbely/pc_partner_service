@@ -68,7 +68,7 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
             if status == "Немає в наявності":
                 continue
 
-            price = float(
+            price = (
                 item.locator("td.productsTable-cell.__price")
                 .first.text_content()
                 .strip()
@@ -76,6 +76,11 @@ def run(playwright: Playwright, query: str, filename: str) -> None:
                 .replace(" ", "")
                 .replace("\xa0", "")
             )
+
+            if not price:
+                continue
+
+            price = float(price)
 
             item_data = Item(
                 src=SOURCE,

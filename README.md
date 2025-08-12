@@ -12,7 +12,7 @@ Run next commands:
 1. `python -m venv .venv`
 2. `source .venv/bin/activate`
 3. `pip install -r requirements.txt`
-4. `uvicorn search_service.main:app --port 9000`
+4. `PARTSTORE_LOGIN=your_login PARTSTORE_PASS=your_password uvicorn search_service.main:app --port 9000`
 
 ___
 

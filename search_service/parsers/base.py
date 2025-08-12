@@ -36,7 +36,7 @@ class BaseParser:
         self.query = query
         self.filename = os.path.join(
             DEFAULT_DIR,
-            f"{type(self).__name__}{datetime.today().strftime('%Y-%m-%d')}.csv",
+            f"{self.query.replace(" ", "_")}_{type(self).__name__}{datetime.today().strftime('%Y-%m-%d')}.csv",
         )
 
     def parse(self):
