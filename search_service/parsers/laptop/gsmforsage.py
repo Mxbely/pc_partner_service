@@ -6,7 +6,7 @@ from search_service.parsers.base import (
     BaseParser,
     Item,
     base_context,
-    delete_file,
+    check_parser_file,
     write_to_csv,
 )
 
@@ -20,7 +20,8 @@ class GSMForsageParser(BaseParser):
 
 
 def run(query, filename: str) -> None:
-    delete_file(filename)
+    if check_parser_file(filename):
+        return filename
     url = "https://gsm-forsage.com.ua/qmultisearch/result/get/"
     params = {
         "query": query,
@@ -43,12 +44,17 @@ def run(query, filename: str) -> None:
     for item in items:
         if not any(stock for stock in item["stocks"] if stock["qty"] == "В наявності"):
             continue
+        try:
+            price = item["price"].replace(",", ".").replace(" грн.", "")
+            price = float(price)
+        except ValueError:
+            continue
 
         item = Item(
             src=SOURCE,
             category="All",
             name=item["name"].replace(",", ""),
-            price=float(item["price"].replace(",", ".").replace(" грн.", "")),
+            price=price,
             url=item["url"],
             status="В наявності",
         )

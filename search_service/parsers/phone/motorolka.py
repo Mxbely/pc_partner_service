@@ -6,7 +6,7 @@ from search_service.parsers.base import (
     BaseParser,
     Item,
     base_context,
-    delete_file,
+    check_parser_file,
     write_to_csv,
 )
 
@@ -20,7 +20,8 @@ class MotorolkaParser(BaseParser):
 
 
 def run(query, filename: str) -> None:
-    delete_file(filename)
+    if check_parser_file(filename):
+        return filename
     url = "https://motorolka.org.ua/multisearch/searchProducts.php"
     params = {"search": query}
     headers = {"User-Agent": "Mozilla/5.0", "X-Requested-With": "XMLHttpRequest"}

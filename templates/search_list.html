@@ -68,7 +68,7 @@
             alert("Будь ласка, введіть запит для пошуку.");
             return;
         }
-        const checkedFilters = Array.from(document.querySelectorAll('input[name="filters"]:checked'))
+        const checkedFilters = Array.from(document.querySelectorAll(`input[name^="filters-"]:checked`))
             .map(cb => cb.value);
         if (checkedFilters.length === 0) {
             alert("Будь ласка, оберіть хоча б один фільтр.");
@@ -139,11 +139,11 @@
         }
     });
 
-    function ToggleAllFilters() {
-        const checkboxes = document.querySelectorAll('input[name="filters"]');
-        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-        checkboxes.forEach(cb => cb.checked = !allChecked);
+    function toggleAllFilters(group, checkbox) {
+        const checkboxes = document.querySelectorAll(`input[name="filters-${group}"]`);
+        checkboxes.forEach(cb => cb.checked = checkbox.checked);
     }
+
 </script>
 
 <style>

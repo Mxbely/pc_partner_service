@@ -1,13 +1,13 @@
 import os
 from dataclasses import asdict
 
-from fastapi import Body, FastAPI, Form, HTTPException, Request
+from fastapi import BackgroundTasks, Body, FastAPI, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
 from search_service.parsers.base import Item
-from search_service.parsers.pipline import filters, start_pipline
+from search_service.parsers.pipline import laptops, phones, start_pipline
 
 app = FastAPI()
 
@@ -22,7 +22,11 @@ def redirect(request: Request):
 
 @app.get("/search", response_class=HTMLResponse, name="search_get")
 def search_get(request: Request):
-    context = {"request": request, "filter_list": [filter for filter in filters.keys()]}
+    context = {
+        "request": request,
+        "filter_laptops": [filter for filter in laptops.keys()],
+        "filter_phones": [filter for filter in phones.keys()],
+    }
     return templates.TemplateResponse(
         request=request, name="search_list.html", context=context
     )
@@ -34,18 +38,26 @@ class SearchData(BaseModel):
 
 
 @app.post("/search", response_class=HTMLResponse, name="search_post")
-def search_post(request: Request, data: SearchData = Body(...)):
+def search_post(
+    request: Request,
+    data: SearchData = Body(...),
+    background_tasks: BackgroundTasks = BackgroundTasks(),
+):
     if data.query:
         print(f"Started query: {data.query}")
         parsers = []
 
         for filter_name in data.filters:
-            if filter_name in filters:
-                parsers.append(filters[filter_name](data.query))
+            if parser := laptops.get(filter_name):
+                parsers.append(parser(data.query))
+                continue
+            if parser := phones.get(filter_name):
+                parsers.append(parser(data.query))
+                continue
 
-        filename = start_pipline(data.query, parsers)
+        filepath = start_pipline(data.query, parsers)
 
-        with open(filename, "r") as f:
+        with open(filepath, "r") as f:
             items = []
             for line in f.readlines():
                 lines = line.strip().split(",")
@@ -64,7 +76,7 @@ def search_post(request: Request, data: SearchData = Body(...)):
             "items": items,
             "total_items": len(items),
         }
-
+    background_tasks.add_task(os.remove, filepath)
     return JSONResponse(
         status_code=200,
         content={
