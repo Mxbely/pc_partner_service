@@ -7,7 +7,7 @@ from search_service.parsers.base import (
     BaseParser,
     Item,
     base_context,
-    delete_file,
+    check_parser_file,
     write_to_csv,
 )
 
@@ -22,7 +22,8 @@ class ArtmobileParser(BaseParser):
 
 
 def run(playwright: Playwright, query: str, filename: str) -> None:
-    delete_file(filename)
+    if check_parser_file(filename):
+        return filename
     browser = playwright.chromium.launch(headless=True)
     context = browser.new_context()
     page = context.new_page()

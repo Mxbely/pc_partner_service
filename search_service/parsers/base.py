@@ -1,6 +1,9 @@
+import os
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+
+from search_service.parsers import DEFAULT_DIR
 
 base_context = {
     "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -31,24 +34,25 @@ class Item:
 class BaseParser:
     def __init__(self, query: str) -> None:
         self.query = query
-        self.filename = (
-            f"{type(self).__name__}{datetime.today().strftime('%Y-%m-%d_%H-%M')}.csv"
+        self.filename = os.path.join(
+            DEFAULT_DIR,
+            f"{type(self).__name__}{datetime.today().strftime('%Y-%m-%d')}.csv",
         )
 
     def parse(self):
         raise NotImplementedError
 
 
-def delete_file(filename: str):
-    if Path(filename).exists():
-        Path(filename).unlink()
+def check_parser_file(filename: str) -> str:
+    if os.path.exists(filename):
+        return filename
 
 
 def write_to_csv(items: list[Item], filename: str):
-    if not Path(filename).exists():
-        with open(filename, "a") as f:
-            f.write("src,category,name,price,url,status\n")
-
+    if os.path.exists(filename):
+        os.remove(filename)
+    with open(filename, "a") as f:
+        f.write("src,category,name,price,url,status\n")
     with open(filename, "a") as f:
         for item in items:
             f.write(

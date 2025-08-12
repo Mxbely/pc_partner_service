@@ -1,7 +1,7 @@
 import os
 from dataclasses import asdict
 
-from fastapi import Body, FastAPI, Form, HTTPException, Request
+from fastapi import BackgroundTasks, Body, FastAPI, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -38,20 +38,26 @@ class SearchData(BaseModel):
 
 
 @app.post("/search", response_class=HTMLResponse, name="search_post")
-def search_post(request: Request, data: SearchData = Body(...)):
+def search_post(
+    request: Request,
+    data: SearchData = Body(...),
+    background_tasks: BackgroundTasks = BackgroundTasks(),
+):
     if data.query:
         print(f"Started query: {data.query}")
         parsers = []
 
         for filter_name in data.filters:
-            if filter_name in laptops and filter_name not in parsers:
-                parsers.append(laptops[filter_name](data.query))
-            if filter_name in phones and filter_name not in parsers:
-                parsers.append(phones[filter_name](data.query))
+            if parser := laptops.get(filter_name):
+                parsers.append(parser(data.query))
+                continue
+            if parser := phones.get(filter_name):
+                parsers.append(parser(data.query))
+                continue
 
-        filename = start_pipline(data.query, parsers)
+        filepath = start_pipline(data.query, parsers)
 
-        with open(filename, "r") as f:
+        with open(filepath, "r") as f:
             items = []
             for line in f.readlines():
                 lines = line.strip().split(",")
@@ -70,7 +76,7 @@ def search_post(request: Request, data: SearchData = Body(...)):
             "items": items,
             "total_items": len(items),
         }
-
+    background_tasks.add_task(os.remove, filepath)
     return JSONResponse(
         status_code=200,
         content={

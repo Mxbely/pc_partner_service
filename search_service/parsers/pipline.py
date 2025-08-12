@@ -4,6 +4,7 @@ from datetime import datetime
 
 from playwright.sync_api import TimeoutError
 
+from search_service.parsers import DEFAULT_DIR
 from search_service.parsers.base import BaseParser
 from search_service.parsers.laptop.allnotebookparts import AllnotebookpartsParser
 from search_service.parsers.laptop.dfi import DFIParser
@@ -87,10 +88,8 @@ def run_parser(parser):
 def start_pipline(query: str, parsers: list[BaseParser]) -> str:
     st = datetime.now()
     finalname = make_filename(query, parsers)
-
-    if check_file_exists(finalname):
-        print(f"File {finalname} already exists. Returning existing file.")
-        return finalname
+    filepath = os.path.join(DEFAULT_DIR, finalname)
+    os.makedirs(DEFAULT_DIR, exist_ok=True)
 
     max_workers = int(os.cpu_count() * 0.75) or 1
     print(f"Using {max_workers} workers for parsing")
@@ -100,20 +99,13 @@ def start_pipline(query: str, parsers: list[BaseParser]) -> str:
         for future in futures:
             future.result()
 
-    if os.path.exists(finalname):
-        os.remove(finalname)
-
-    with open(finalname, "w") as f:
-        pass
-
-    with open(finalname, "a") as f:
+    with open(filepath, "a") as f:
         for parser in parsers:
             if os.path.exists(parser.filename):
                 with open(parser.filename, "r") as file:
                     lines = file.readlines()
                     f.writelines(lines[1:])
-                os.remove(parser.filename)
 
     end = datetime.now()
     print(f"Pipeline finished in {end - st}")
-    return finalname
+    return filepath
